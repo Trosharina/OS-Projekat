@@ -1,0 +1,175 @@
+GAS LISTING /tmp/ccTwxaPW.s 			page 1
+
+
+   1              		.file	"ModTest.cpp"
+   2              		.option pic
+   3              		.option norelax
+   4              		.text
+   5              	.Ltext0:
+   6              		.section	.rodata.str1.8,"aMS",@progbits,1
+   7              		.align	3
+   8              	.LC0:
+   9 0000 0A2D2D2D 		.string	"\n-------------\n"
+   9      2D2D2D2D 
+   9      2D2D2D2D 
+   9      2D2D0A00 
+  10              		.align	3
+  11              	.LC1:
+  12 0010 54455354 		.string	"TEST FINISHED"
+  12      2046494E 
+  12      49534845 
+  12      4400
+  13              		.text
+  14              		.align	2
+  15              		.globl	_Z8mod_testv
+  17              	_Z8mod_testv:
+  18              	.LFB2:
+  19              		.file 1 "test/ModTest.cpp"
+   1:test/ModTest.cpp **** #include "ModTest.hpp"
+   2:test/ModTest.cpp **** #include "../h/syscall_cpp.hpp"
+   3:test/ModTest.cpp **** #include "printing.hpp"
+   4:test/ModTest.cpp **** 
+   5:test/ModTest.cpp **** void mod_test() {
+  20              		.loc 1 5 17
+  21              		.cfi_startproc
+  22 0000 130101FF 		addi	sp,sp,-16
+  23              		.cfi_def_cfa_offset 16
+  24 0004 23341100 		sd	ra,8(sp)
+  25 0008 23308100 		sd	s0,0(sp)
+  26              		.cfi_offset 1, -8
+  27              		.cfi_offset 8, -16
+  28 000c 13040101 		addi	s0,sp,16
+  29              		.cfi_def_cfa 8, 0
+   6:test/ModTest.cpp ****     int c = getc();
+  30              		.loc 1 6 5
+  31              		.loc 1 6 17 is_stmt 0
+  32 0010 97000000 		call	_Z4getcv@plt
+  32      E7800000 
+  33              	.LVL0:
+   7:test/ModTest.cpp ****     if (c == -1) {
+  34              		.loc 1 7 5 is_stmt 1
+   8:test/ModTest.cpp ****         printString("Prepravljivanje ulaza");
+   9:test/ModTest.cpp ****         return;
+  10:test/ModTest.cpp ****     }
+  11:test/ModTest.cpp **** 
+  12:test/ModTest.cpp ****     printString("\n-------------\n");
+  35              		.loc 1 12 5
+  36              		.loc 1 12 16 is_stmt 0
+  37 0018 17050000 		lla	a0,.LC0
+  37      13050500 
+  38 0020 97000000 		call	_Z11printStringPKc@plt
+GAS LISTING /tmp/ccTwxaPW.s 			page 2
+
+
+  38      E7800000 
+  39              	.LVL1:
+  13:test/ModTest.cpp ****     printString("TEST FINISHED");
+  40              		.loc 1 13 5 is_stmt 1
+  41              		.loc 1 13 16 is_stmt 0
+  42 0028 17050000 		lla	a0,.LC1
+  42      13050500 
+  43 0030 97000000 		call	_Z11printStringPKc@plt
+  43      E7800000 
+  44              	.LVL2:
+  14:test/ModTest.cpp ****     printString("\n-------------\n");
+  45              		.loc 1 14 5 is_stmt 1
+  46              		.loc 1 14 16 is_stmt 0
+  47 0038 17050000 		lla	a0,.LC0
+  47      13050500 
+  48 0040 97000000 		call	_Z11printStringPKc@plt
+  48      E7800000 
+  49              	.LVL3:
+  15:test/ModTest.cpp **** }
+  50              		.loc 1 15 1
+  51 0048 83308100 		ld	ra,8(sp)
+  52              		.cfi_restore 1
+  53 004c 03340100 		ld	s0,0(sp)
+  54              		.cfi_restore 8
+  55              		.cfi_def_cfa 2, 16
+  56 0050 13010101 		addi	sp,sp,16
+  57              		.cfi_def_cfa_offset 0
+  58 0054 67800000 		jr	ra
+  59              		.cfi_endproc
+  60              	.LFE2:
+  62              	.Letext0:
+  63              		.file 2 "test/../h/../lib//hw.h"
+  64              		.file 3 "test/../h/syscall_c.h"
+  65              		.file 4 "test/printing.hpp"
+GAS LISTING /tmp/ccTwxaPW.s 			page 3
+
+
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 ModTest.cpp
+     /tmp/ccTwxaPW.s:17     .text:0000000000000000 _Z8mod_testv
+     /tmp/ccTwxaPW.s:21     .text:0000000000000000 .L0 
+     /tmp/ccTwxaPW.s:22     .text:0000000000000000 .L0 
+     /tmp/ccTwxaPW.s:23     .text:0000000000000004 .L0 
+     /tmp/ccTwxaPW.s:26     .text:000000000000000c .L0 
+     /tmp/ccTwxaPW.s:27     .text:000000000000000c .L0 
+     /tmp/ccTwxaPW.s:29     .text:0000000000000010 .L0 
+     /tmp/ccTwxaPW.s:31     .text:0000000000000010 .L0 
+     /tmp/ccTwxaPW.s:32     .text:0000000000000010 .L0 
+     /tmp/ccTwxaPW.s:35     .text:0000000000000018 .L0 
+     /tmp/ccTwxaPW.s:36     .text:0000000000000018 .L0 
+     /tmp/ccTwxaPW.s:37     .text:0000000000000018 .L0 
+     /tmp/ccTwxaPW.s:41     .text:0000000000000028 .L0 
+     /tmp/ccTwxaPW.s:42     .text:0000000000000028 .L0 
+     /tmp/ccTwxaPW.s:46     .text:0000000000000038 .L0 
+     /tmp/ccTwxaPW.s:47     .text:0000000000000038 .L0 
+     /tmp/ccTwxaPW.s:51     .text:0000000000000048 .L0 
+     /tmp/ccTwxaPW.s:52     .text:000000000000004c .L0 
+     /tmp/ccTwxaPW.s:54     .text:0000000000000050 .L0 
+     /tmp/ccTwxaPW.s:55     .text:0000000000000050 .L0 
+     /tmp/ccTwxaPW.s:57     .text:0000000000000054 .L0 
+     /tmp/ccTwxaPW.s:59     .text:0000000000000058 .L0 
+     /tmp/ccTwxaPW.s:66     .text:0000000000000058 .L0 
+     /tmp/ccTwxaPW.s:8      .rodata.str1.8:0000000000000000 .LC0
+     /tmp/ccTwxaPW.s:37     .text:0000000000000018 .L0 
+     /tmp/ccTwxaPW.s:11     .rodata.str1.8:0000000000000010 .LC1
+     /tmp/ccTwxaPW.s:42     .text:0000000000000028 .L0 
+     /tmp/ccTwxaPW.s:47     .text:0000000000000038 .L0 
+     /tmp/ccTwxaPW.s:272    .debug_abbrev:0000000000000000 .Ldebug_abbrev0
+     /tmp/ccTwxaPW.s:577    .debug_str:0000000000000136 .LASF22
+     /tmp/ccTwxaPW.s:567    .debug_str:00000000000000d6 .LASF23
+     /tmp/ccTwxaPW.s:537    .debug_str:000000000000000d .LASF24
+     /tmp/ccTwxaPW.s:5      .text:0000000000000000 .Ltext0
+     /tmp/ccTwxaPW.s:62     .text:0000000000000058 .Letext0
+     /tmp/ccTwxaPW.s:533    .debug_line:0000000000000000 .Ldebug_line0
+     /tmp/ccTwxaPW.s:535    .debug_str:0000000000000000 .LASF0
+     /tmp/ccTwxaPW.s:575    .debug_str:0000000000000123 .LASF1
+     /tmp/ccTwxaPW.s:559    .debug_str:00000000000000a8 .LASF2
+     /tmp/ccTwxaPW.s:555    .debug_str:0000000000000095 .LASF4
+     /tmp/ccTwxaPW.s:551    .debug_str:0000000000000070 .LASF3
+     /tmp/ccTwxaPW.s:543    .debug_str:0000000000000044 .LASF5
+     /tmp/ccTwxaPW.s:553    .debug_str:0000000000000082 .LASF6
+     /tmp/ccTwxaPW.s:573    .debug_str:0000000000000110 .LASF7
+     /tmp/ccTwxaPW.s:583    .debug_str:0000000000000212 .LASF8
+     /tmp/ccTwxaPW.s:539    .debug_str:0000000000000027 .LASF9
+     /tmp/ccTwxaPW.s:541    .debug_str:0000000000000035 .LASF10
+     /tmp/ccTwxaPW.s:579    .debug_str:00000000000001fa .LASF11
+     /tmp/ccTwxaPW.s:545    .debug_str:000000000000004b .LASF12
+     /tmp/ccTwxaPW.s:585    .debug_str:0000000000000222 .LASF13
+     /tmp/ccTwxaPW.s:557    .debug_str:000000000000009c .LASF14
+     /tmp/ccTwxaPW.s:569    .debug_str:00000000000000e7 .LASF15
+     /tmp/ccTwxaPW.s:565    .debug_str:00000000000000c0 .LASF16
+     /tmp/ccTwxaPW.s:561    .debug_str:00000000000000b6 .LASF17
+     /tmp/ccTwxaPW.s:581    .debug_str:0000000000000209 .LASF25
+     /tmp/ccTwxaPW.s:587    .debug_str:0000000000000232 .LASF26
+GAS LISTING /tmp/ccTwxaPW.s 			page 4
+
+
+     /tmp/ccTwxaPW.s:18     .text:0000000000000000 .LFB2
+     /tmp/ccTwxaPW.s:60     .text:0000000000000058 .LFE2
+     /tmp/ccTwxaPW.s:33     .text:0000000000000018 .LVL0
+     /tmp/ccTwxaPW.s:39     .text:0000000000000028 .LVL1
+     /tmp/ccTwxaPW.s:44     .text:0000000000000038 .LVL2
+     /tmp/ccTwxaPW.s:49     .text:0000000000000048 .LVL3
+     /tmp/ccTwxaPW.s:549    .debug_str:0000000000000067 .LASF18
+     /tmp/ccTwxaPW.s:563    .debug_str:00000000000000bb .LASF20
+     /tmp/ccTwxaPW.s:571    .debug_str:00000000000000fd .LASF19
+     /tmp/ccTwxaPW.s:547    .debug_str:000000000000005b .LASF21
+     /tmp/ccTwxaPW.s:67     .debug_info:0000000000000000 .Ldebug_info0
+
+UNDEFINED SYMBOLS
+_Z4getcv
+_Z11printStringPKc

@@ -1,0 +1,1858 @@
+GAS LISTING /tmp/cchYazkt.s 			page 1
+
+
+   1              		.file	"TrapHandler.cpp"
+   2              		.option pic
+   3              		.option norelax
+   4              		.text
+   5              	.Ltext0:
+   6              		.align	2
+   8              	_ZL15cleanupFinishedv:
+   9              	.LFB13:
+  10              		.file 1 "src/TrapHandler.cpp"
+   1:src/TrapHandler.cpp **** #include "../lib/hw.h"
+   2:src/TrapHandler.cpp **** #include "../h/MemoryAllocator.h"
+   3:src/TrapHandler.cpp **** #include "../h/Thread.h"
+   4:src/TrapHandler.cpp **** #include "../h/Scheduler.h"
+   5:src/TrapHandler.cpp **** #include "../h/OPCodes.h"
+   6:src/TrapHandler.cpp **** #include "../h/Semaphore.h"
+   7:src/TrapHandler.cpp **** #include "../h/Console.h"
+   8:src/TrapHandler.cpp **** 
+   9:src/TrapHandler.cpp **** using namespace kernel;
+  10:src/TrapHandler.cpp **** 
+  11:src/TrapHandler.cpp **** extern "C" void yield(Thread*, Thread*);
+  12:src/TrapHandler.cpp **** 
+  13:src/TrapHandler.cpp **** static Thread* toDelete = nullptr;
+  14:src/TrapHandler.cpp **** 
+  15:src/TrapHandler.cpp **** static void cleanupFinished() {
+  11              		.loc 1 15 31
+  12              		.cfi_startproc
+  16:src/TrapHandler.cpp ****     if (toDelete) {
+  13              		.loc 1 16 5
+  14              		.loc 1 16 17 is_stmt 0
+  15 0000 97070000 		ld	a5,.LANCHOR0
+  15      83B70700 
+  16              		.loc 1 16 5
+  17 0008 63880704 		beqz	a5,.L4
+  15:src/TrapHandler.cpp ****     if (toDelete) {
+  18              		.loc 1 15 31
+  19 000c 130101FE 		addi	sp,sp,-32
+  20              		.cfi_def_cfa_offset 32
+  21 0010 233C1100 		sd	ra,24(sp)
+  22 0014 23388100 		sd	s0,16(sp)
+  23 0018 23349100 		sd	s1,8(sp)
+  24              		.cfi_offset 1, -8
+  25              		.cfi_offset 8, -16
+  26              		.cfi_offset 9, -24
+  27 001c 13040102 		addi	s0,sp,32
+  28              		.cfi_def_cfa 8, 0
+  17:src/TrapHandler.cpp ****         MemoryAllocator::dealloc(toDelete->getSystemStackBase());
+  29              		.loc 1 17 9 is_stmt 1
+  30              	.LVL0:
+  31              	.LBB24:
+  32              	.LBB25:
+  33              		.file 2 "src/../h/Thread.h"
+   1:src/../h/Thread.h **** #ifndef OSPROJ_THREAD_H
+   2:src/../h/Thread.h **** #define OSPROJ_THREAD_H
+   3:src/../h/Thread.h **** 
+   4:src/../h/Thread.h **** #include "../lib/hw.h"
+   5:src/../h/Thread.h **** #include "MemoryAllocator.h"
+   6:src/../h/Thread.h **** #include "Kmem.h"
+GAS LISTING /tmp/cchYazkt.s 			page 2
+
+
+   7:src/../h/Thread.h **** #include "../h/syscall_c.h"
+   8:src/../h/Thread.h **** #include "SemStatus.h"
+   9:src/../h/Thread.h **** #include "ThreadState.h"
+  10:src/../h/Thread.h **** 
+  11:src/../h/Thread.h **** namespace kernel {
+  12:src/../h/Thread.h ****     struct Context {
+  13:src/../h/Thread.h ****         uint64 sp;
+  14:src/../h/Thread.h ****     };
+  15:src/../h/Thread.h **** 
+  16:src/../h/Thread.h ****     class Thread {
+  17:src/../h/Thread.h ****     public:
+  18:src/../h/Thread.h ****         Context context;
+  19:src/../h/Thread.h ****         Thread(void (*func)(void*), void*);
+  20:src/../h/Thread.h ****         ~Thread();
+  21:src/../h/Thread.h **** 
+  22:src/../h/Thread.h ****         static Thread* createThread(void (*func)(void*), void*);
+  23:src/../h/Thread.h ****         static Thread* createMainThread();
+  24:src/../h/Thread.h ****         static Thread* createKernelThread(void (*func)(void*), void*);
+  25:src/../h/Thread.h **** 
+  26:src/../h/Thread.h ****         void start();
+  27:src/../h/Thread.h ****         int exit();
+  28:src/../h/Thread.h **** 
+  29:src/../h/Thread.h ****         ThreadState getState() const { return state; }
+  30:src/../h/Thread.h ****         void* getSystemStackBase() const { return systemstackSpace; }
+  34              		.loc 2 30 44
+  35              	.LBE25:
+  36              	.LBE24:
+  37              		.loc 1 17 33 is_stmt 0
+  38 0020 03B50702 		ld	a0,32(a5)
+  39 0024 97000000 		call	_ZN15MemoryAllocator7deallocEPv@plt
+  39      E7800000 
+  40              	.LVL1:
+  18:src/TrapHandler.cpp ****         MemoryAllocator::dealloc(toDelete);
+  41              		.loc 1 18 9 is_stmt 1
+  42              		.loc 1 18 33 is_stmt 0
+  43 002c 97040000 		lla	s1,.LANCHOR0
+  43      93840400 
+  44 0034 03B50400 		ld	a0,0(s1)
+  45 0038 97000000 		call	_ZN15MemoryAllocator7deallocEPv@plt
+  45      E7800000 
+  46              	.LVL2:
+  19:src/TrapHandler.cpp ****         toDelete = nullptr;
+  47              		.loc 1 19 9 is_stmt 1
+  48              		.loc 1 19 18 is_stmt 0
+  49 0040 23B00400 		sd	zero,0(s1)
+  20:src/TrapHandler.cpp ****     }
+  21:src/TrapHandler.cpp **** }
+  50              		.loc 1 21 1
+  51 0044 83308101 		ld	ra,24(sp)
+  52              		.cfi_restore 1
+  53 0048 03340101 		ld	s0,16(sp)
+  54              		.cfi_restore 8
+  55              		.cfi_def_cfa 2, 32
+  56 004c 83348100 		ld	s1,8(sp)
+  57              		.cfi_restore 9
+  58 0050 13010102 		addi	sp,sp,32
+  59              		.cfi_def_cfa_offset 0
+GAS LISTING /tmp/cchYazkt.s 			page 3
+
+
+  60 0054 67800000 		jr	ra
+  61              	.L4:
+  62 0058 67800000 		ret
+  63              		.cfi_endproc
+  64              	.LFE13:
+  66              		.align	2
+  67              		.globl	TrapHandler
+  69              	TrapHandler:
+  70              	.LFB14:
+  22:src/TrapHandler.cpp **** 
+  23:src/TrapHandler.cpp **** extern "C" void TrapHandler(uint64* context) {
+  71              		.loc 1 23 46 is_stmt 1
+  72              		.cfi_startproc
+  73              	.LVL3:
+  74 005c 130101FD 		addi	sp,sp,-48
+  75              		.cfi_def_cfa_offset 48
+  76 0060 23341102 		sd	ra,40(sp)
+  77 0064 23308102 		sd	s0,32(sp)
+  78 0068 233C9100 		sd	s1,24(sp)
+  79 006c 23382101 		sd	s2,16(sp)
+  80 0070 23343101 		sd	s3,8(sp)
+  81              		.cfi_offset 1, -8
+  82              		.cfi_offset 8, -16
+  83              		.cfi_offset 9, -24
+  84              		.cfi_offset 18, -32
+  85              		.cfi_offset 19, -40
+  86 0074 13040103 		addi	s0,sp,48
+  87              		.cfi_def_cfa 8, 0
+  88 0078 93040500 		mv	s1,a0
+  24:src/TrapHandler.cpp ****     cleanupFinished();
+  89              		.loc 1 24 5
+  90              		.loc 1 24 20 is_stmt 0
+  91 007c 97000000 		call	_ZL15cleanupFinishedv
+  91      E7800000 
+  92              	.LVL4:
+  25:src/TrapHandler.cpp ****     uint64 scause;
+  93              		.loc 1 25 5 is_stmt 1
+  26:src/TrapHandler.cpp ****     asm volatile("csrr %0, scause" : "=r"(scause));
+  94              		.loc 1 26 5
+  95              		.loc 1 26 51 is_stmt 0
+  96              	#APP
+  97              	# 26 "src/TrapHandler.cpp" 1
+  27              	
+  98              		csrr a4, scause
+  99              	# 0 "" 2
+ 100              	.LVL5:
+  28:src/TrapHandler.cpp ****     if (scause == 0x08 || scause == 0x09) {
+ 101              		.loc 1 28 5 is_stmt 1
+ 102              	#NO_APP
+ 103              	.LBB26:
+ 104              		.loc 1 28 24 is_stmt 0
+ 105 0088 930687FF 		addi	a3,a4,-8
+ 106              		.loc 1 28 5
+ 107 008c 93071000 		li	a5,1
+ 108 0090 63F0D704 		bleu	a3,a5,.L32
+ 109              	.LBE26:
+  29:src/TrapHandler.cpp ****         context[31] += 4;
+GAS LISTING /tmp/cchYazkt.s 			page 4
+
+
+  30:src/TrapHandler.cpp **** 
+  31:src/TrapHandler.cpp ****         uint64 syscallCode = context[13];
+  32:src/TrapHandler.cpp ****         uint64 arg1 = context[14];
+  33:src/TrapHandler.cpp **** 
+  34:src/TrapHandler.cpp ****         switch (syscallCode) {
+  35:src/TrapHandler.cpp ****             case MEM_ALLOC: {
+  36:src/TrapHandler.cpp ****                 void* adr = MemoryAllocator::malloc((size_t)arg1);
+  37:src/TrapHandler.cpp ****                 context[13] = (uint64)adr;
+  38:src/TrapHandler.cpp ****                 break;
+  39:src/TrapHandler.cpp ****             }
+  40:src/TrapHandler.cpp ****             case MEM_FREE: {
+  41:src/TrapHandler.cpp ****                 int status = MemoryAllocator::dealloc((void*)arg1);
+  42:src/TrapHandler.cpp ****                 context[13] = (uint64)status;
+  43:src/TrapHandler.cpp ****                 break;
+  44:src/TrapHandler.cpp ****             }
+  45:src/TrapHandler.cpp ****             case THREAD_EXIT: {
+  46:src/TrapHandler.cpp ****                 Thread* old = Scheduler::getRunning();
+  47:src/TrapHandler.cpp ****                 old->setState(FINISHED);
+  48:src/TrapHandler.cpp ****                 toDelete = old;
+  49:src/TrapHandler.cpp ****                 Thread* next = Scheduler::get();
+  50:src/TrapHandler.cpp ****                 Scheduler::setRunning(next);
+  51:src/TrapHandler.cpp ****                 yield(old, next);
+  52:src/TrapHandler.cpp ****                 break;
+  53:src/TrapHandler.cpp ****             }
+  54:src/TrapHandler.cpp ****             case THREAD_DISPATCH: {
+  55:src/TrapHandler.cpp ****                 Thread* old = Scheduler::getRunning();
+  56:src/TrapHandler.cpp ****                 Scheduler::put(old);
+  57:src/TrapHandler.cpp ****                 Thread* next = Scheduler::get();
+  58:src/TrapHandler.cpp ****                 Scheduler::setRunning(next);
+  59:src/TrapHandler.cpp ****                 yield(old, next);
+  60:src/TrapHandler.cpp ****                 break;
+  61:src/TrapHandler.cpp ****             }
+  62:src/TrapHandler.cpp ****             case THREAD_CREATE: {
+  63:src/TrapHandler.cpp ****                 thread_t* handle = (thread_t*)context[14];
+  64:src/TrapHandler.cpp ****                 void(*routine)(void*) = (void(*)(void*))context[15];
+  65:src/TrapHandler.cpp ****                 void* arg = (void*)context[16];
+  66:src/TrapHandler.cpp ****                 Thread* t = Thread::createThread(routine, arg);
+  67:src/TrapHandler.cpp ****                 if (!t) {context[13] = (uint64)-1; break;};
+  68:src/TrapHandler.cpp ****                 *handle = (thread_t)t;
+  69:src/TrapHandler.cpp ****                 Scheduler::put(t);
+  70:src/TrapHandler.cpp ****                 context[13] = (uint64)0;
+  71:src/TrapHandler.cpp ****                 break;
+  72:src/TrapHandler.cpp ****             }
+  73:src/TrapHandler.cpp ****             case GET_ID: {
+  74:src/TrapHandler.cpp ****                 context[13] = (uint64)Scheduler::getRunning()->getId();
+  75:src/TrapHandler.cpp ****                 break;
+  76:src/TrapHandler.cpp ****             }
+  77:src/TrapHandler.cpp ****             case THREAD_SEND: {
+  78:src/TrapHandler.cpp ****                 Scheduler::getRunning()->send((Thread*)context[14], (char*)context[15]);
+  79:src/TrapHandler.cpp ****                 context[13] = 0;
+  80:src/TrapHandler.cpp ****                 break;
+  81:src/TrapHandler.cpp ****             }
+  82:src/TrapHandler.cpp ****             case THREAD_RECIEVE: {
+  83:src/TrapHandler.cpp ****                 char* msg = Scheduler::getRunning()->recieve();
+  84:src/TrapHandler.cpp ****                 context[13] = (uint64)msg;
+  85:src/TrapHandler.cpp ****                 break;
+  86:src/TrapHandler.cpp ****             }
+GAS LISTING /tmp/cchYazkt.s 			page 5
+
+
+  87:src/TrapHandler.cpp ****             case SEM_OPEN: {
+  88:src/TrapHandler.cpp ****                 sem_t* handle = (sem_t*)context[14];
+  89:src/TrapHandler.cpp ****                 unsigned init = (unsigned)context[15];
+  90:src/TrapHandler.cpp ****                 Semaphore* s = Semaphore::createSemaphore(init);
+  91:src/TrapHandler.cpp ****                 if (!s) {context[13] = (uint64)-1; break;};
+  92:src/TrapHandler.cpp ****                 *handle = (sem_t)s;
+  93:src/TrapHandler.cpp ****                 context[13] = (uint64)0;
+  94:src/TrapHandler.cpp ****                 break;
+  95:src/TrapHandler.cpp ****             }
+  96:src/TrapHandler.cpp ****             case SEM_CLOSE: {
+  97:src/TrapHandler.cpp ****                 context[13] = (uint64)Semaphore::deallocSemaphore((Semaphore*)context[14]);
+  98:src/TrapHandler.cpp ****                 break;
+  99:src/TrapHandler.cpp ****             }
+ 100:src/TrapHandler.cpp ****             case SEM_WAIT: {
+ 101:src/TrapHandler.cpp ****                 context[13] = (uint64)((Semaphore*)context[14])->wait();
+ 102:src/TrapHandler.cpp ****                 break;
+ 103:src/TrapHandler.cpp ****             }
+ 104:src/TrapHandler.cpp ****             case SEM_SIGNAL: {
+ 105:src/TrapHandler.cpp ****                 context[13] = (uint64)((Semaphore*)context[14])->signal();
+ 106:src/TrapHandler.cpp ****                 break;
+ 107:src/TrapHandler.cpp ****             }
+ 108:src/TrapHandler.cpp ****             case TIME_SLEEP: {
+ 109:src/TrapHandler.cpp ****                 uint64 ticks = context[14];
+ 110:src/TrapHandler.cpp ****                 Thread* old = Scheduler::getRunning();
+ 111:src/TrapHandler.cpp ****                 Scheduler::putToSleep(old, ticks);
+ 112:src/TrapHandler.cpp ****                 Thread* next = Scheduler::get();
+ 113:src/TrapHandler.cpp ****                 Scheduler::setRunning(next);
+ 114:src/TrapHandler.cpp ****                 yield(old, next);
+ 115:src/TrapHandler.cpp ****                 context[13] = (uint64)0;
+ 116:src/TrapHandler.cpp ****                 break;
+ 117:src/TrapHandler.cpp ****             }
+ 118:src/TrapHandler.cpp ****             case GETC: {
+ 119:src/TrapHandler.cpp ****                 context[13] = (uint64)Console::getc();
+ 120:src/TrapHandler.cpp ****                 break;
+ 121:src/TrapHandler.cpp ****             }
+ 122:src/TrapHandler.cpp ****             case PUTC: {
+ 123:src/TrapHandler.cpp ****                 Console::putc((char)context[14]);
+ 124:src/TrapHandler.cpp ****                 context[13] = (uint64)0;
+ 125:src/TrapHandler.cpp ****                 break;
+ 126:src/TrapHandler.cpp ****             }
+ 127:src/TrapHandler.cpp ****             default:
+ 128:src/TrapHandler.cpp ****                 context[13] = (uint64)-1;
+ 129:src/TrapHandler.cpp ****                 break;
+ 130:src/TrapHandler.cpp ****         }
+ 131:src/TrapHandler.cpp ****     }
+ 132:src/TrapHandler.cpp ****     else if (scause == 0x8000000000000001ULL) {
+ 110              		.loc 1 132 10 is_stmt 1
+ 111              	.LBB51:
+ 112              	.LBB27:
+ 113 0094 9307F0FF 		li	a5,-1
+ 114 0098 9397F703 		slli	a5,a5,63
+ 115 009c 93871700 		addi	a5,a5,1
+ 116 00a0 6304F726 		beq	a4,a5,.L33
+ 117              	.LBE27:
+ 118              	.LBE51:
+ 133:src/TrapHandler.cpp ****         uint64 sip;
+ 134:src/TrapHandler.cpp ****         __asm__ volatile("csrr %0, sip" : "=r"(sip));
+GAS LISTING /tmp/cchYazkt.s 			page 6
+
+
+ 135:src/TrapHandler.cpp ****         sip &= ~(1ULL << 1);
+ 136:src/TrapHandler.cpp ****         __asm__ volatile("csrw sip, %0" : : "r"(sip));
+ 137:src/TrapHandler.cpp **** 
+ 138:src/TrapHandler.cpp ****         Scheduler::onTick();
+ 139:src/TrapHandler.cpp **** 
+ 140:src/TrapHandler.cpp ****         Thread* old = Scheduler::getRunning();
+ 141:src/TrapHandler.cpp ****         Scheduler::put(old);
+ 142:src/TrapHandler.cpp ****         Thread* next = Scheduler::get();
+ 143:src/TrapHandler.cpp ****         Scheduler::setRunning(next);
+ 144:src/TrapHandler.cpp ****         yield(old, next);
+ 145:src/TrapHandler.cpp ****     }
+ 146:src/TrapHandler.cpp **** 
+ 147:src/TrapHandler.cpp ****     else if (scause == 0x8000000000000009ULL) {
+ 119              		.loc 1 147 10
+ 120              	.LBB52:
+ 121              	.LBB34:
+ 122              	.LBB28:
+ 123 00a4 9307F0FF 		li	a5,-1
+ 124 00a8 9397F703 		slli	a5,a5,63
+ 125 00ac 93879700 		addi	a5,a5,9
+ 126 00b0 6304F72A 		beq	a4,a5,.L34
+ 127              	.LVL6:
+ 128              	.L7:
+ 129              	.LBE28:
+ 130              	.LBE34:
+ 131              	.LBE52:
+ 148:src/TrapHandler.cpp ****         int irq = plic_claim();
+ 149:src/TrapHandler.cpp ****         if (irq == CONSOLE_IRQ){
+ 150:src/TrapHandler.cpp ****             Console::handleInterrupt();
+ 151:src/TrapHandler.cpp ****         }
+ 152:src/TrapHandler.cpp ****         plic_complete(irq);
+ 153:src/TrapHandler.cpp ****     }
+ 154:src/TrapHandler.cpp **** }...
+ 132              		.loc 1 154 1 is_stmt 0
+ 133 00b4 83308102 		ld	ra,40(sp)
+ 134              		.cfi_remember_state
+ 135              		.cfi_restore 1
+ 136 00b8 03340102 		ld	s0,32(sp)
+ 137              		.cfi_restore 8
+ 138              		.cfi_def_cfa 2, 48
+ 139 00bc 83348101 		ld	s1,24(sp)
+ 140              		.cfi_restore 9
+ 141 00c0 03390101 		ld	s2,16(sp)
+ 142              		.cfi_restore 18
+ 143 00c4 83398100 		ld	s3,8(sp)
+ 144              		.cfi_restore 19
+ 145 00c8 13010103 		addi	sp,sp,48
+ 146              		.cfi_def_cfa_offset 0
+ 147 00cc 67800000 		jr	ra
+ 148              	.LVL7:
+ 149              	.L32:
+ 150              		.cfi_restore_state
+ 151              	.LBB53:
+ 152              	.LBB35:
+  29:src/TrapHandler.cpp ****         context[31] += 4;
+ 153              		.loc 1 29 9 is_stmt 1
+  29:src/TrapHandler.cpp ****         context[31] += 4;
+GAS LISTING /tmp/cchYazkt.s 			page 7
+
+
+ 154              		.loc 1 29 21 is_stmt 0
+ 155 00d0 83B7840F 		ld	a5,248(s1)
+ 156 00d4 93874700 		addi	a5,a5,4
+ 157 00d8 23BCF40E 		sd	a5,248(s1)
+  31:src/TrapHandler.cpp ****         uint64 syscallCode = context[13];
+ 158              		.loc 1 31 9 is_stmt 1
+  31:src/TrapHandler.cpp ****         uint64 syscallCode = context[13];
+ 159              		.loc 1 31 16 is_stmt 0
+ 160 00dc 83B78406 		ld	a5,104(s1)
+ 161              	.LVL8:
+  32:src/TrapHandler.cpp ****         uint64 arg1 = context[14];
+ 162              		.loc 1 32 9 is_stmt 1
+  32:src/TrapHandler.cpp ****         uint64 arg1 = context[14];
+ 163              		.loc 1 32 16 is_stmt 0
+ 164 00e0 03B90407 		ld	s2,112(s1)
+ 165              	.LVL9:
+  34:src/TrapHandler.cpp ****         switch (syscallCode) {
+ 166              		.loc 1 34 9 is_stmt 1
+ 167 00e4 13072004 		li	a4,66
+ 168              	.LVL10:
+ 169 00e8 636AF720 		bgtu	a5,a4,.L9
+ 170 00ec 93972700 		slli	a5,a5,2
+ 171              	.LVL11:
+ 172 00f0 17070000 		lla	a4,.L11
+ 172      13070700 
+ 173 00f8 B387E700 		add	a5,a5,a4
+ 174 00fc 83A70700 		lw	a5,0(a5)
+ 175 0100 B387E700 		add	a5,a5,a4
+ 176 0104 67800700 		jr	a5
+ 177              		.section	.rodata
+ 178              		.align	2
+ 179              		.align	2
+ 180              	.L11:
+ 181 0000 00000000 		.word	.L9-.L11
+ 182 0004 00000000 		.word	.L25-.L11
+ 183 0008 00000000 		.word	.L24-.L11
+ 184 000c 00000000 		.word	.L9-.L11
+ 185 0010 00000000 		.word	.L9-.L11
+ 186 0014 00000000 		.word	.L9-.L11
+ 187 0018 00000000 		.word	.L9-.L11
+ 188 001c 00000000 		.word	.L9-.L11
+ 189 0020 00000000 		.word	.L9-.L11
+ 190 0024 00000000 		.word	.L9-.L11
+ 191 0028 00000000 		.word	.L9-.L11
+ 192 002c 00000000 		.word	.L9-.L11
+ 193 0030 00000000 		.word	.L9-.L11
+ 194 0034 00000000 		.word	.L9-.L11
+ 195 0038 00000000 		.word	.L9-.L11
+ 196 003c 00000000 		.word	.L9-.L11
+ 197 0040 00000000 		.word	.L9-.L11
+ 198 0044 00000000 		.word	.L23-.L11
+ 199 0048 00000000 		.word	.L22-.L11
+ 200 004c 00000000 		.word	.L21-.L11
+ 201 0050 00000000 		.word	.L20-.L11
+ 202 0054 00000000 		.word	.L19-.L11
+ 203 0058 00000000 		.word	.L18-.L11
+ 204 005c 00000000 		.word	.L9-.L11
+GAS LISTING /tmp/cchYazkt.s 			page 8
+
+
+ 205 0060 00000000 		.word	.L9-.L11
+ 206 0064 00000000 		.word	.L9-.L11
+ 207 0068 00000000 		.word	.L9-.L11
+ 208 006c 00000000 		.word	.L9-.L11
+ 209 0070 00000000 		.word	.L9-.L11
+ 210 0074 00000000 		.word	.L9-.L11
+ 211 0078 00000000 		.word	.L9-.L11
+ 212 007c 00000000 		.word	.L9-.L11
+ 213 0080 00000000 		.word	.L9-.L11
+ 214 0084 00000000 		.word	.L17-.L11
+ 215 0088 00000000 		.word	.L16-.L11
+ 216 008c 00000000 		.word	.L15-.L11
+ 217 0090 00000000 		.word	.L14-.L11
+ 218 0094 00000000 		.word	.L9-.L11
+ 219 0098 00000000 		.word	.L9-.L11
+ 220 009c 00000000 		.word	.L9-.L11
+ 221 00a0 00000000 		.word	.L9-.L11
+ 222 00a4 00000000 		.word	.L9-.L11
+ 223 00a8 00000000 		.word	.L9-.L11
+ 224 00ac 00000000 		.word	.L9-.L11
+ 225 00b0 00000000 		.word	.L9-.L11
+ 226 00b4 00000000 		.word	.L9-.L11
+ 227 00b8 00000000 		.word	.L9-.L11
+ 228 00bc 00000000 		.word	.L9-.L11
+ 229 00c0 00000000 		.word	.L9-.L11
+ 230 00c4 00000000 		.word	.L13-.L11
+ 231 00c8 00000000 		.word	.L9-.L11
+ 232 00cc 00000000 		.word	.L9-.L11
+ 233 00d0 00000000 		.word	.L9-.L11
+ 234 00d4 00000000 		.word	.L9-.L11
+ 235 00d8 00000000 		.word	.L9-.L11
+ 236 00dc 00000000 		.word	.L9-.L11
+ 237 00e0 00000000 		.word	.L9-.L11
+ 238 00e4 00000000 		.word	.L9-.L11
+ 239 00e8 00000000 		.word	.L9-.L11
+ 240 00ec 00000000 		.word	.L9-.L11
+ 241 00f0 00000000 		.word	.L9-.L11
+ 242 00f4 00000000 		.word	.L9-.L11
+ 243 00f8 00000000 		.word	.L9-.L11
+ 244 00fc 00000000 		.word	.L9-.L11
+ 245 0100 00000000 		.word	.L9-.L11
+ 246 0104 00000000 		.word	.L12-.L11
+ 247 0108 00000000 		.word	.L10-.L11
+ 248              		.text
+ 249              	.L25:
+ 250              	.LBB36:
+  35:src/TrapHandler.cpp ****             case MEM_ALLOC: {
+ 251              		.loc 1 35 13
+  35:src/TrapHandler.cpp ****             case MEM_ALLOC: {
+ 252              		.loc 1 35 29
+ 253              	.LBB37:
+  36:src/TrapHandler.cpp ****                 void* adr = MemoryAllocator::malloc((size_t)arg1);
+ 254              		.loc 1 36 17
+  36:src/TrapHandler.cpp ****                 void* adr = MemoryAllocator::malloc((size_t)arg1);
+ 255              		.loc 1 36 52 is_stmt 0
+ 256 0108 13050900 		mv	a0,s2
+ 257 010c 97000000 		call	_ZN15MemoryAllocator6mallocEm@plt
+GAS LISTING /tmp/cchYazkt.s 			page 9
+
+
+ 257      E7800000 
+ 258              	.LVL12:
+  37:src/TrapHandler.cpp ****                 context[13] = (uint64)adr;
+ 259              		.loc 1 37 17 is_stmt 1
+  37:src/TrapHandler.cpp ****                 context[13] = (uint64)adr;
+ 260              		.loc 1 37 29 is_stmt 0
+ 261 0114 23B4A406 		sd	a0,104(s1)
+  38:src/TrapHandler.cpp ****                 break;
+ 262              		.loc 1 38 17 is_stmt 1
+ 263 0118 6FF0DFF9 		j	.L7
+ 264              	.LVL13:
+ 265              	.L24:
+ 266              	.LBE37:
+  40:src/TrapHandler.cpp ****             case MEM_FREE: {
+ 267              		.loc 1 40 13
+  40:src/TrapHandler.cpp ****             case MEM_FREE: {
+ 268              		.loc 1 40 28
+ 269              	.LBB38:
+  41:src/TrapHandler.cpp ****                 int status = MemoryAllocator::dealloc((void*)arg1);
+ 270              		.loc 1 41 17
+  41:src/TrapHandler.cpp ****                 int status = MemoryAllocator::dealloc((void*)arg1);
+ 271              		.loc 1 41 54 is_stmt 0
+ 272 011c 13050900 		mv	a0,s2
+ 273 0120 97000000 		call	_ZN15MemoryAllocator7deallocEPv@plt
+ 273      E7800000 
+ 274              	.LVL14:
+  42:src/TrapHandler.cpp ****                 context[13] = (uint64)status;
+ 275              		.loc 1 42 17 is_stmt 1
+  42:src/TrapHandler.cpp ****                 context[13] = (uint64)status;
+ 276              		.loc 1 42 29 is_stmt 0
+ 277 0128 23B4A406 		sd	a0,104(s1)
+  43:src/TrapHandler.cpp ****                 break;
+ 278              		.loc 1 43 17 is_stmt 1
+ 279 012c 6FF09FF8 		j	.L7
+ 280              	.LVL15:
+ 281              	.L22:
+ 282              	.LBE38:
+  45:src/TrapHandler.cpp ****             case THREAD_EXIT: {
+ 283              		.loc 1 45 13
+  45:src/TrapHandler.cpp ****             case THREAD_EXIT: {
+ 284              		.loc 1 45 31
+ 285              	.LBB39:
+  46:src/TrapHandler.cpp ****                 Thread* old = Scheduler::getRunning();
+ 286              		.loc 1 46 17
+  46:src/TrapHandler.cpp ****                 Thread* old = Scheduler::getRunning();
+ 287              		.loc 1 46 52 is_stmt 0
+ 288 0130 97000000 		call	_ZN6kernel9Scheduler10getRunningEv@plt
+ 288      E7800000 
+ 289              	.LVL16:
+ 290 0138 93040500 		mv	s1,a0
+ 291              	.LVL17:
+  47:src/TrapHandler.cpp ****                 old->setState(FINISHED);
+ 292              		.loc 1 47 17 is_stmt 1
+ 293              	.LBB40:
+ 294              	.LBB41:
+  31:src/../h/Thread.h ****         void (*getFunc())(void*) const {return func;}
+  32:src/../h/Thread.h ****         void* getArg() const { return arg; }
+GAS LISTING /tmp/cchYazkt.s 			page 10
+
+
+  33:src/../h/Thread.h **** 
+  34:src/../h/Thread.h ****         void setState(ThreadState state) { this->state = state; }
+ 295              		.loc 2 34 44
+ 296              		.loc 2 34 56 is_stmt 0
+ 297 013c 93073000 		li	a5,3
+ 298 0140 2328F502 		sw	a5,48(a0)
+ 299              	.LVL18:
+ 300              	.LBE41:
+ 301              	.LBE40:
+  48:src/TrapHandler.cpp ****                 toDelete = old;
+ 302              		.loc 1 48 17 is_stmt 1
+  48:src/TrapHandler.cpp ****                 toDelete = old;
+ 303              		.loc 1 48 26 is_stmt 0
+ 304 0144 97070000 		sd	a0,.LANCHOR0,a5
+ 304      23B0A700 
+  49:src/TrapHandler.cpp ****                 Thread* next = Scheduler::get();
+ 305              		.loc 1 49 17 is_stmt 1
+  49:src/TrapHandler.cpp ****                 Thread* next = Scheduler::get();
+ 306              		.loc 1 49 46 is_stmt 0
+ 307 014c 97000000 		call	_ZN6kernel9Scheduler3getEv@plt
+ 307      E7800000 
+ 308              	.LVL19:
+ 309 0154 13090500 		mv	s2,a0
+ 310              	.LVL20:
+  50:src/TrapHandler.cpp ****                 Scheduler::setRunning(next);
+ 311              		.loc 1 50 17 is_stmt 1
+  50:src/TrapHandler.cpp ****                 Scheduler::setRunning(next);
+ 312              		.loc 1 50 38 is_stmt 0
+ 313 0158 97000000 		call	_ZN6kernel9Scheduler10setRunningEPNS_6ThreadE@plt
+ 313      E7800000 
+ 314              	.LVL21:
+  51:src/TrapHandler.cpp ****                 yield(old, next);
+ 315              		.loc 1 51 17 is_stmt 1
+  51:src/TrapHandler.cpp ****                 yield(old, next);
+ 316              		.loc 1 51 22 is_stmt 0
+ 317 0160 93050900 		mv	a1,s2
+ 318 0164 13850400 		mv	a0,s1
+ 319 0168 97000000 		call	yield@plt
+ 319      E7800000 
+ 320              	.LVL22:
+  52:src/TrapHandler.cpp ****                 break;
+ 321              		.loc 1 52 17 is_stmt 1
+ 322 0170 6FF05FF4 		j	.L7
+ 323              	.LVL23:
+ 324              	.L21:
+ 325              	.LBE39:
+  54:src/TrapHandler.cpp ****             case THREAD_DISPATCH: {
+ 326              		.loc 1 54 13
+  54:src/TrapHandler.cpp ****             case THREAD_DISPATCH: {
+ 327              		.loc 1 54 35
+ 328              	.LBB42:
+  55:src/TrapHandler.cpp ****                 Thread* old = Scheduler::getRunning();
+ 329              		.loc 1 55 17
+  55:src/TrapHandler.cpp ****                 Thread* old = Scheduler::getRunning();
+ 330              		.loc 1 55 52 is_stmt 0
+ 331 0174 97000000 		call	_ZN6kernel9Scheduler10getRunningEv@plt
+ 331      E7800000 
+GAS LISTING /tmp/cchYazkt.s 			page 11
+
+
+ 332              	.LVL24:
+ 333 017c 93040500 		mv	s1,a0
+ 334              	.LVL25:
+  56:src/TrapHandler.cpp ****                 Scheduler::put(old);
+ 335              		.loc 1 56 17 is_stmt 1
+  56:src/TrapHandler.cpp ****                 Scheduler::put(old);
+ 336              		.loc 1 56 31 is_stmt 0
+ 337 0180 97000000 		call	_ZN6kernel9Scheduler3putEPNS_6ThreadE@plt
+ 337      E7800000 
+ 338              	.LVL26:
+  57:src/TrapHandler.cpp ****                 Thread* next = Scheduler::get();
+ 339              		.loc 1 57 17 is_stmt 1
+  57:src/TrapHandler.cpp ****                 Thread* next = Scheduler::get();
+ 340              		.loc 1 57 46 is_stmt 0
+ 341 0188 97000000 		call	_ZN6kernel9Scheduler3getEv@plt
+ 341      E7800000 
+ 342              	.LVL27:
+ 343 0190 13090500 		mv	s2,a0
+ 344              	.LVL28:
+  58:src/TrapHandler.cpp ****                 Scheduler::setRunning(next);
+ 345              		.loc 1 58 17 is_stmt 1
+  58:src/TrapHandler.cpp ****                 Scheduler::setRunning(next);
+ 346              		.loc 1 58 38 is_stmt 0
+ 347 0194 97000000 		call	_ZN6kernel9Scheduler10setRunningEPNS_6ThreadE@plt
+ 347      E7800000 
+ 348              	.LVL29:
+  59:src/TrapHandler.cpp ****                 yield(old, next);
+ 349              		.loc 1 59 17 is_stmt 1
+  59:src/TrapHandler.cpp ****                 yield(old, next);
+ 350              		.loc 1 59 22 is_stmt 0
+ 351 019c 93050900 		mv	a1,s2
+ 352 01a0 13850400 		mv	a0,s1
+ 353 01a4 97000000 		call	yield@plt
+ 353      E7800000 
+ 354              	.LVL30:
+  60:src/TrapHandler.cpp ****                 break;
+ 355              		.loc 1 60 17 is_stmt 1
+ 356 01ac 6FF09FF0 		j	.L7
+ 357              	.LVL31:
+ 358              	.L23:
+ 359              	.LBE42:
+  62:src/TrapHandler.cpp ****             case THREAD_CREATE: {
+ 360              		.loc 1 62 13
+  62:src/TrapHandler.cpp ****             case THREAD_CREATE: {
+ 361              		.loc 1 62 33
+ 362              	.LBB43:
+  63:src/TrapHandler.cpp ****                 thread_t* handle = (thread_t*)context[14];
+ 363              		.loc 1 63 17
+  64:src/TrapHandler.cpp ****                 void(*routine)(void*) = (void(*)(void*))context[15];
+ 364              		.loc 1 64 17
+  65:src/TrapHandler.cpp ****                 void* arg = (void*)context[16];
+ 365              		.loc 1 65 17
+  66:src/TrapHandler.cpp ****                 Thread* t = Thread::createThread(routine, arg);
+ 366              		.loc 1 66 17
+  66:src/TrapHandler.cpp ****                 Thread* t = Thread::createThread(routine, arg);
+ 367              		.loc 1 66 49 is_stmt 0
+ 368 01b0 83B50408 		ld	a1,128(s1)
+GAS LISTING /tmp/cchYazkt.s 			page 12
+
+
+ 369 01b4 03B58407 		ld	a0,120(s1)
+ 370 01b8 97000000 		call	_ZN6kernel6Thread12createThreadEPFvPvES1_@plt
+ 370      E7800000 
+ 371              	.LVL32:
+  67:src/TrapHandler.cpp ****                 if (!t) {context[13] = (uint64)-1; break;};
+ 372              		.loc 1 67 17 is_stmt 1
+ 373 01c0 630C0500 		beqz	a0,.L35
+  67:src/TrapHandler.cpp ****                 if (!t) {context[13] = (uint64)-1; break;};
+ 374              		.loc 1 67 59 discriminator 2
+  68:src/TrapHandler.cpp ****                 *handle = (thread_t)t;
+ 375              		.loc 1 68 17 discriminator 2
+  68:src/TrapHandler.cpp ****                 *handle = (thread_t)t;
+ 376              		.loc 1 68 25 is_stmt 0 discriminator 2
+ 377 01c4 2330A900 		sd	a0,0(s2)
+  69:src/TrapHandler.cpp ****                 Scheduler::put(t);
+ 378              		.loc 1 69 17 is_stmt 1 discriminator 2
+  69:src/TrapHandler.cpp ****                 Scheduler::put(t);
+ 379              		.loc 1 69 31 is_stmt 0 discriminator 2
+ 380 01c8 97000000 		call	_ZN6kernel9Scheduler3putEPNS_6ThreadE@plt
+ 380      E7800000 
+ 381              	.LVL33:
+  70:src/TrapHandler.cpp ****                 context[13] = (uint64)0;
+ 382              		.loc 1 70 17 is_stmt 1 discriminator 2
+  70:src/TrapHandler.cpp ****                 context[13] = (uint64)0;
+ 383              		.loc 1 70 29 is_stmt 0 discriminator 2
+ 384 01d0 23B40406 		sd	zero,104(s1)
+  71:src/TrapHandler.cpp ****                 break;
+ 385              		.loc 1 71 17 is_stmt 1 discriminator 2
+ 386 01d4 6FF01FEE 		j	.L7
+ 387              	.LVL34:
+ 388              	.L35:
+  67:src/TrapHandler.cpp ****                 if (!t) {context[13] = (uint64)-1; break;};
+ 389              		.loc 1 67 26 discriminator 1
+  67:src/TrapHandler.cpp ****                 if (!t) {context[13] = (uint64)-1; break;};
+ 390              		.loc 1 67 38 is_stmt 0 discriminator 1
+ 391 01d8 9307F0FF 		li	a5,-1
+ 392 01dc 23B4F406 		sd	a5,104(s1)
+  67:src/TrapHandler.cpp ****                 if (!t) {context[13] = (uint64)-1; break;};
+ 393              		.loc 1 67 52 is_stmt 1 discriminator 1
+ 394 01e0 6FF05FED 		j	.L7
+ 395              	.LVL35:
+ 396              	.L20:
+ 397              	.LBE43:
+  73:src/TrapHandler.cpp ****             case GET_ID: {
+ 398              		.loc 1 73 13
+  73:src/TrapHandler.cpp ****             case GET_ID: {
+ 399              		.loc 1 73 26
+  74:src/TrapHandler.cpp ****                 context[13] = (uint64)Scheduler::getRunning()->getId();
+ 400              		.loc 1 74 17
+  74:src/TrapHandler.cpp ****                 context[13] = (uint64)Scheduler::getRunning()->getId();
+ 401              		.loc 1 74 69 is_stmt 0
+ 402 01e4 97000000 		call	_ZN6kernel9Scheduler10getRunningEv@plt
+ 402      E7800000 
+ 403              	.LVL36:
+ 404              	.LBB44:
+ 405              	.LBB45:
+  35:src/../h/Thread.h ****         int getId() const { return id; }
+GAS LISTING /tmp/cchYazkt.s 			page 13
+
+
+ 406              		.loc 2 35 29 is_stmt 1
+ 407              		.loc 2 35 36 is_stmt 0
+ 408 01ec 83278506 		lw	a5,104(a0)
+ 409              	.LVL37:
+ 410              	.LBE45:
+ 411              	.LBE44:
+  74:src/TrapHandler.cpp ****                 context[13] = (uint64)Scheduler::getRunning()->getId();
+ 412              		.loc 1 74 29
+ 413 01f0 23B4F406 		sd	a5,104(s1)
+  75:src/TrapHandler.cpp ****                 break;
+ 414              		.loc 1 75 17 is_stmt 1
+ 415 01f4 6FF01FEC 		j	.L7
+ 416              	.LVL38:
+ 417              	.L19:
+  77:src/TrapHandler.cpp ****             case THREAD_SEND: {
+ 418              		.loc 1 77 13
+  77:src/TrapHandler.cpp ****             case THREAD_SEND: {
+ 419              		.loc 1 77 31
+  78:src/TrapHandler.cpp ****                 Scheduler::getRunning()->send((Thread*)context[14], (char*)context[15]);
+ 420              		.loc 1 78 17
+  78:src/TrapHandler.cpp ****                 Scheduler::getRunning()->send((Thread*)context[14], (char*)context[15]);
+ 421              		.loc 1 78 46 is_stmt 0
+ 422 01f8 97000000 		call	_ZN6kernel9Scheduler10getRunningEv@plt
+ 422      E7800000 
+ 423              	.LVL39:
+ 424 0200 03B68407 		ld	a2,120(s1)
+ 425 0204 83B50407 		ld	a1,112(s1)
+ 426 0208 97000000 		call	_ZN6kernel6Thread4sendEPS0_Pc@plt
+ 426      E7800000 
+ 427              	.LVL40:
+  79:src/TrapHandler.cpp ****                 context[13] = 0;
+ 428              		.loc 1 79 17 is_stmt 1
+  79:src/TrapHandler.cpp ****                 context[13] = 0;
+ 429              		.loc 1 79 29 is_stmt 0
+ 430 0210 23B40406 		sd	zero,104(s1)
+  80:src/TrapHandler.cpp ****                 break;
+ 431              		.loc 1 80 17 is_stmt 1
+ 432 0214 6FF01FEA 		j	.L7
+ 433              	.LVL41:
+ 434              	.L18:
+  82:src/TrapHandler.cpp ****             case THREAD_RECIEVE: {
+ 435              		.loc 1 82 13
+  82:src/TrapHandler.cpp ****             case THREAD_RECIEVE: {
+ 436              		.loc 1 82 34
+ 437              	.LBB46:
+  83:src/TrapHandler.cpp ****                 char* msg = Scheduler::getRunning()->recieve();
+ 438              		.loc 1 83 17
+  83:src/TrapHandler.cpp ****                 char* msg = Scheduler::getRunning()->recieve();
+ 439              		.loc 1 83 61 is_stmt 0
+ 440 0218 97000000 		call	_ZN6kernel9Scheduler10getRunningEv@plt
+ 440      E7800000 
+ 441              	.LVL42:
+ 442 0220 97000000 		call	_ZN6kernel6Thread7recieveEv@plt
+ 442      E7800000 
+ 443              	.LVL43:
+  84:src/TrapHandler.cpp ****                 context[13] = (uint64)msg;
+ 444              		.loc 1 84 17 is_stmt 1
+GAS LISTING /tmp/cchYazkt.s 			page 14
+
+
+  84:src/TrapHandler.cpp ****                 context[13] = (uint64)msg;
+ 445              		.loc 1 84 29 is_stmt 0
+ 446 0228 23B4A406 		sd	a0,104(s1)
+  85:src/TrapHandler.cpp ****                 break;
+ 447              		.loc 1 85 17 is_stmt 1
+ 448 022c 6FF09FE8 		j	.L7
+ 449              	.LVL44:
+ 450              	.L17:
+ 451              	.LBE46:
+  87:src/TrapHandler.cpp ****             case SEM_OPEN: {
+ 452              		.loc 1 87 13
+  87:src/TrapHandler.cpp ****             case SEM_OPEN: {
+ 453              		.loc 1 87 28
+ 454              	.LBB47:
+  88:src/TrapHandler.cpp ****                 sem_t* handle = (sem_t*)context[14];
+ 455              		.loc 1 88 17
+  89:src/TrapHandler.cpp ****                 unsigned init = (unsigned)context[15];
+ 456              		.loc 1 89 17
+  90:src/TrapHandler.cpp ****                 Semaphore* s = Semaphore::createSemaphore(init);
+ 457              		.loc 1 90 17
+  90:src/TrapHandler.cpp ****                 Semaphore* s = Semaphore::createSemaphore(init);
+ 458              		.loc 1 90 58 is_stmt 0
+ 459 0230 03A58407 		lw	a0,120(s1)
+ 460 0234 97000000 		call	_ZN6kernel9Semaphore15createSemaphoreEj@plt
+ 460      E7800000 
+ 461              	.LVL45:
+  91:src/TrapHandler.cpp ****                 if (!s) {context[13] = (uint64)-1; break;};
+ 462              		.loc 1 91 17 is_stmt 1
+ 463 023c 63080500 		beqz	a0,.L36
+  91:src/TrapHandler.cpp ****                 if (!s) {context[13] = (uint64)-1; break;};
+ 464              		.loc 1 91 59 discriminator 2
+  92:src/TrapHandler.cpp ****                 *handle = (sem_t)s;
+ 465              		.loc 1 92 17 discriminator 2
+  92:src/TrapHandler.cpp ****                 *handle = (sem_t)s;
+ 466              		.loc 1 92 25 is_stmt 0 discriminator 2
+ 467 0240 2330A900 		sd	a0,0(s2)
+  93:src/TrapHandler.cpp ****                 context[13] = (uint64)0;
+ 468              		.loc 1 93 17 is_stmt 1 discriminator 2
+  93:src/TrapHandler.cpp ****                 context[13] = (uint64)0;
+ 469              		.loc 1 93 29 is_stmt 0 discriminator 2
+ 470 0244 23B40406 		sd	zero,104(s1)
+  94:src/TrapHandler.cpp ****                 break;
+ 471              		.loc 1 94 17 is_stmt 1 discriminator 2
+ 472 0248 6FF0DFE6 		j	.L7
+ 473              	.L36:
+  91:src/TrapHandler.cpp ****                 if (!s) {context[13] = (uint64)-1; break;};
+ 474              		.loc 1 91 26 discriminator 1
+  91:src/TrapHandler.cpp ****                 if (!s) {context[13] = (uint64)-1; break;};
+ 475              		.loc 1 91 38 is_stmt 0 discriminator 1
+ 476 024c 9307F0FF 		li	a5,-1
+ 477 0250 23B4F406 		sd	a5,104(s1)
+  91:src/TrapHandler.cpp ****                 if (!s) {context[13] = (uint64)-1; break;};
+ 478              		.loc 1 91 52 is_stmt 1 discriminator 1
+ 479 0254 6FF01FE6 		j	.L7
+ 480              	.LVL46:
+ 481              	.L16:
+ 482              	.LBE47:
+GAS LISTING /tmp/cchYazkt.s 			page 15
+
+
+  96:src/TrapHandler.cpp ****             case SEM_CLOSE: {
+ 483              		.loc 1 96 13
+  96:src/TrapHandler.cpp ****             case SEM_CLOSE: {
+ 484              		.loc 1 96 29
+  97:src/TrapHandler.cpp ****                 context[13] = (uint64)Semaphore::deallocSemaphore((Semaphore*)context[14]);
+ 485              		.loc 1 97 17
+  97:src/TrapHandler.cpp ****                 context[13] = (uint64)Semaphore::deallocSemaphore((Semaphore*)context[14]);
+ 486              		.loc 1 97 66 is_stmt 0
+ 487 0258 13050900 		mv	a0,s2
+ 488 025c 97000000 		call	_ZN6kernel9Semaphore16deallocSemaphoreEPS0_@plt
+ 488      E7800000 
+ 489              	.LVL47:
+  97:src/TrapHandler.cpp ****                 context[13] = (uint64)Semaphore::deallocSemaphore((Semaphore*)context[14]);
+ 490              		.loc 1 97 29
+ 491 0264 23B4A406 		sd	a0,104(s1)
+  98:src/TrapHandler.cpp ****                 break;
+ 492              		.loc 1 98 17 is_stmt 1
+ 493 0268 6FF0DFE4 		j	.L7
+ 494              	.LVL48:
+ 495              	.L15:
+ 100:src/TrapHandler.cpp ****             case SEM_WAIT: {
+ 496              		.loc 1 100 13
+ 100:src/TrapHandler.cpp ****             case SEM_WAIT: {
+ 497              		.loc 1 100 28
+ 101:src/TrapHandler.cpp ****                 context[13] = (uint64)((Semaphore*)context[14])->wait();
+ 498              		.loc 1 101 17
+ 101:src/TrapHandler.cpp ****                 context[13] = (uint64)((Semaphore*)context[14])->wait();
+ 499              		.loc 1 101 70 is_stmt 0
+ 500 026c 13050900 		mv	a0,s2
+ 501 0270 97000000 		call	_ZN6kernel9Semaphore4waitEv@plt
+ 501      E7800000 
+ 502              	.LVL49:
+ 101:src/TrapHandler.cpp ****                 context[13] = (uint64)((Semaphore*)context[14])->wait();
+ 503              		.loc 1 101 29
+ 504 0278 23B4A406 		sd	a0,104(s1)
+ 102:src/TrapHandler.cpp ****                 break;
+ 505              		.loc 1 102 17 is_stmt 1
+ 506 027c 6FF09FE3 		j	.L7
+ 507              	.LVL50:
+ 508              	.L14:
+ 104:src/TrapHandler.cpp ****             case SEM_SIGNAL: {
+ 509              		.loc 1 104 13
+ 104:src/TrapHandler.cpp ****             case SEM_SIGNAL: {
+ 510              		.loc 1 104 30
+ 105:src/TrapHandler.cpp ****                 context[13] = (uint64)((Semaphore*)context[14])->signal();
+ 511              		.loc 1 105 17
+ 105:src/TrapHandler.cpp ****                 context[13] = (uint64)((Semaphore*)context[14])->signal();
+ 512              		.loc 1 105 72 is_stmt 0
+ 513 0280 13050900 		mv	a0,s2
+ 514 0284 97000000 		call	_ZN6kernel9Semaphore6signalEv@plt
+ 514      E7800000 
+ 515              	.LVL51:
+ 105:src/TrapHandler.cpp ****                 context[13] = (uint64)((Semaphore*)context[14])->signal();
+ 516              		.loc 1 105 29
+ 517 028c 23B4A406 		sd	a0,104(s1)
+ 106:src/TrapHandler.cpp ****                 break;
+ 518              		.loc 1 106 17 is_stmt 1
+GAS LISTING /tmp/cchYazkt.s 			page 16
+
+
+ 519 0290 6FF05FE2 		j	.L7
+ 520              	.LVL52:
+ 521              	.L13:
+ 108:src/TrapHandler.cpp ****             case TIME_SLEEP: {
+ 522              		.loc 1 108 13
+ 108:src/TrapHandler.cpp ****             case TIME_SLEEP: {
+ 523              		.loc 1 108 30
+ 524              	.LBB48:
+ 109:src/TrapHandler.cpp ****                 uint64 ticks = context[14];
+ 525              		.loc 1 109 17
+ 110:src/TrapHandler.cpp ****                 Thread* old = Scheduler::getRunning();
+ 526              		.loc 1 110 17
+ 110:src/TrapHandler.cpp ****                 Thread* old = Scheduler::getRunning();
+ 527              		.loc 1 110 52 is_stmt 0
+ 528 0294 97000000 		call	_ZN6kernel9Scheduler10getRunningEv@plt
+ 528      E7800000 
+ 529              	.LVL53:
+ 530 029c 93090500 		mv	s3,a0
+ 531              	.LVL54:
+ 111:src/TrapHandler.cpp ****                 Scheduler::putToSleep(old, ticks);
+ 532              		.loc 1 111 17 is_stmt 1
+ 111:src/TrapHandler.cpp ****                 Scheduler::putToSleep(old, ticks);
+ 533              		.loc 1 111 38 is_stmt 0
+ 534 02a0 93050900 		mv	a1,s2
+ 535 02a4 97000000 		call	_ZN6kernel9Scheduler10putToSleepEPNS_6ThreadEm@plt
+ 535      E7800000 
+ 536              	.LVL55:
+ 112:src/TrapHandler.cpp ****                 Thread* next = Scheduler::get();
+ 537              		.loc 1 112 17 is_stmt 1
+ 112:src/TrapHandler.cpp ****                 Thread* next = Scheduler::get();
+ 538              		.loc 1 112 46 is_stmt 0
+ 539 02ac 97000000 		call	_ZN6kernel9Scheduler3getEv@plt
+ 539      E7800000 
+ 540              	.LVL56:
+ 541 02b4 13090500 		mv	s2,a0
+ 542              	.LVL57:
+ 113:src/TrapHandler.cpp ****                 Scheduler::setRunning(next);
+ 543              		.loc 1 113 17 is_stmt 1
+ 113:src/TrapHandler.cpp ****                 Scheduler::setRunning(next);
+ 544              		.loc 1 113 38 is_stmt 0
+ 545 02b8 97000000 		call	_ZN6kernel9Scheduler10setRunningEPNS_6ThreadE@plt
+ 545      E7800000 
+ 546              	.LVL58:
+ 114:src/TrapHandler.cpp ****                 yield(old, next);
+ 547              		.loc 1 114 17 is_stmt 1
+ 114:src/TrapHandler.cpp ****                 yield(old, next);
+ 548              		.loc 1 114 22 is_stmt 0
+ 549 02c0 93050900 		mv	a1,s2
+ 550 02c4 13850900 		mv	a0,s3
+ 551 02c8 97000000 		call	yield@plt
+ 551      E7800000 
+ 552              	.LVL59:
+ 115:src/TrapHandler.cpp ****                 context[13] = (uint64)0;
+ 553              		.loc 1 115 17 is_stmt 1
+ 115:src/TrapHandler.cpp ****                 context[13] = (uint64)0;
+ 554              		.loc 1 115 29 is_stmt 0
+ 555 02d0 23B40406 		sd	zero,104(s1)
+GAS LISTING /tmp/cchYazkt.s 			page 17
+
+
+ 116:src/TrapHandler.cpp ****                 break;
+ 556              		.loc 1 116 17 is_stmt 1
+ 557 02d4 6FF01FDE 		j	.L7
+ 558              	.LVL60:
+ 559              	.L12:
+ 560              	.LBE48:
+ 118:src/TrapHandler.cpp ****             case GETC: {
+ 561              		.loc 1 118 13
+ 118:src/TrapHandler.cpp ****             case GETC: {
+ 562              		.loc 1 118 24
+ 119:src/TrapHandler.cpp ****                 context[13] = (uint64)Console::getc();
+ 563              		.loc 1 119 17
+ 119:src/TrapHandler.cpp ****                 context[13] = (uint64)Console::getc();
+ 564              		.loc 1 119 52 is_stmt 0
+ 565 02d8 97000000 		call	_ZN6kernel7Console4getcEv@plt
+ 565      E7800000 
+ 566              	.LVL61:
+ 119:src/TrapHandler.cpp ****                 context[13] = (uint64)Console::getc();
+ 567              		.loc 1 119 29
+ 568 02e0 23B4A406 		sd	a0,104(s1)
+ 120:src/TrapHandler.cpp ****                 break;
+ 569              		.loc 1 120 17 is_stmt 1
+ 570 02e4 6FF01FDD 		j	.L7
+ 571              	.LVL62:
+ 572              	.L10:
+ 122:src/TrapHandler.cpp ****             case PUTC: {
+ 573              		.loc 1 122 13
+ 122:src/TrapHandler.cpp ****             case PUTC: {
+ 574              		.loc 1 122 24
+ 123:src/TrapHandler.cpp ****                 Console::putc((char)context[14]);
+ 575              		.loc 1 123 17
+ 123:src/TrapHandler.cpp ****                 Console::putc((char)context[14]);
+ 576              		.loc 1 123 30 is_stmt 0
+ 577 02e8 1375F90F 		andi	a0,s2,0xff
+ 578 02ec 97000000 		call	_ZN6kernel7Console4putcEc@plt
+ 578      E7800000 
+ 579              	.LVL63:
+ 124:src/TrapHandler.cpp ****                 context[13] = (uint64)0;
+ 580              		.loc 1 124 17 is_stmt 1
+ 124:src/TrapHandler.cpp ****                 context[13] = (uint64)0;
+ 581              		.loc 1 124 29 is_stmt 0
+ 582 02f4 23B40406 		sd	zero,104(s1)
+ 125:src/TrapHandler.cpp ****                 break;
+ 583              		.loc 1 125 17 is_stmt 1
+ 584 02f8 6FF0DFDB 		j	.L7
+ 585              	.LVL64:
+ 586              	.L9:
+ 127:src/TrapHandler.cpp ****             default:
+ 587              		.loc 1 127 13
+ 128:src/TrapHandler.cpp ****                 context[13] = (uint64)-1;
+ 588              		.loc 1 128 17
+ 128:src/TrapHandler.cpp ****                 context[13] = (uint64)-1;
+ 589              		.loc 1 128 29 is_stmt 0
+ 590 02fc 9307F0FF 		li	a5,-1
+ 591 0300 23B4F406 		sd	a5,104(s1)
+ 592              	.LVL65:
+ 129:src/TrapHandler.cpp ****                 break;
+GAS LISTING /tmp/cchYazkt.s 			page 18
+
+
+ 593              		.loc 1 129 17 is_stmt 1
+ 594 0304 6FF01FDB 		j	.L7
+ 595              	.LVL66:
+ 596              	.L33:
+ 597              	.LBE36:
+ 598              	.LBE35:
+ 599              	.LBB49:
+ 600              	.LBB31:
+ 133:src/TrapHandler.cpp ****         uint64 sip;
+ 601              		.loc 1 133 9
+ 134:src/TrapHandler.cpp ****         __asm__ volatile("csrr %0, sip" : "=r"(sip));
+ 602              		.loc 1 134 9
+ 134:src/TrapHandler.cpp ****         __asm__ volatile("csrr %0, sip" : "=r"(sip));
+ 603              		.loc 1 134 53 is_stmt 0
+ 604              	#APP
+ 605              	# 134 "src/TrapHandler.cpp" 1
+ 606              		csrr a5, sip
+ 607              	# 0 "" 2
+ 608              	.LVL67:
+ 135:src/TrapHandler.cpp ****         sip &= ~(1ULL << 1);
+ 609              		.loc 1 135 9 is_stmt 1
+ 135:src/TrapHandler.cpp ****         sip &= ~(1ULL << 1);
+ 610              		.loc 1 135 13 is_stmt 0
+ 611              	#NO_APP
+ 612 030c 93F7D7FF 		andi	a5,a5,-3
+ 613              	.LVL68:
+ 136:src/TrapHandler.cpp ****         __asm__ volatile("csrw sip, %0" : : "r"(sip));
+ 614              		.loc 1 136 9 is_stmt 1
+ 136:src/TrapHandler.cpp ****         __asm__ volatile("csrw sip, %0" : : "r"(sip));
+ 615              		.loc 1 136 54 is_stmt 0
+ 616              	#APP
+ 617              	# 136 "src/TrapHandler.cpp" 1
+ 138:src/TrapHandler.cpp ****         Scheduler::onTick();
+ 618              		csrw sip, a5
+ 619              	# 0 "" 2
+ 620              		.loc 1 138 9 is_stmt 1
+ 138:src/TrapHandler.cpp ****         Scheduler::onTick();
+ 621              		.loc 1 138 26 is_stmt 0
+ 622              	#NO_APP
+ 623 0314 97000000 		call	_ZN6kernel9Scheduler6onTickEv@plt
+ 623      E7800000 
+ 624              	.LVL69:
+ 140:src/TrapHandler.cpp ****         Thread* old = Scheduler::getRunning();
+ 625              		.loc 1 140 9 is_stmt 1
+ 140:src/TrapHandler.cpp ****         Thread* old = Scheduler::getRunning();
+ 626              		.loc 1 140 44 is_stmt 0
+ 627 031c 97000000 		call	_ZN6kernel9Scheduler10getRunningEv@plt
+ 627      E7800000 
+ 628              	.LVL70:
+ 629 0324 93040500 		mv	s1,a0
+ 630              	.LVL71:
+ 141:src/TrapHandler.cpp ****         Scheduler::put(old);
+ 631              		.loc 1 141 9 is_stmt 1
+ 141:src/TrapHandler.cpp ****         Scheduler::put(old);
+ 632              		.loc 1 141 23 is_stmt 0
+ 633 0328 97000000 		call	_ZN6kernel9Scheduler3putEPNS_6ThreadE@plt
+ 633      E7800000 
+GAS LISTING /tmp/cchYazkt.s 			page 19
+
+
+ 634              	.LVL72:
+ 142:src/TrapHandler.cpp ****         Thread* next = Scheduler::get();
+ 635              		.loc 1 142 9 is_stmt 1
+ 142:src/TrapHandler.cpp ****         Thread* next = Scheduler::get();
+ 636              		.loc 1 142 38 is_stmt 0
+ 637 0330 97000000 		call	_ZN6kernel9Scheduler3getEv@plt
+ 637      E7800000 
+ 638              	.LVL73:
+ 639 0338 13090500 		mv	s2,a0
+ 640              	.LVL74:
+ 143:src/TrapHandler.cpp ****         Scheduler::setRunning(next);
+ 641              		.loc 1 143 9 is_stmt 1
+ 143:src/TrapHandler.cpp ****         Scheduler::setRunning(next);
+ 642              		.loc 1 143 30 is_stmt 0
+ 643 033c 97000000 		call	_ZN6kernel9Scheduler10setRunningEPNS_6ThreadE@plt
+ 643      E7800000 
+ 644              	.LVL75:
+ 144:src/TrapHandler.cpp ****         yield(old, next);
+ 645              		.loc 1 144 9 is_stmt 1
+ 144:src/TrapHandler.cpp ****         yield(old, next);
+ 646              		.loc 1 144 14 is_stmt 0
+ 647 0344 93050900 		mv	a1,s2
+ 648 0348 13850400 		mv	a0,s1
+ 649 034c 97000000 		call	yield@plt
+ 649      E7800000 
+ 650              	.LVL76:
+ 651              	.LBE31:
+ 652 0354 6FF01FD6 		j	.L7
+ 653              	.LVL77:
+ 654              	.L34:
+ 655              	.LBB32:
+ 656              	.LBB29:
+ 148:src/TrapHandler.cpp ****         int irq = plic_claim();
+ 657              		.loc 1 148 9 is_stmt 1
+ 148:src/TrapHandler.cpp ****         int irq = plic_claim();
+ 658              		.loc 1 148 29 is_stmt 0
+ 659 0358 97000000 		call	plic_claim@plt
+ 659      E7800000 
+ 660              	.LVL78:
+ 661 0360 93040500 		mv	s1,a0
+ 662              	.LVL79:
+ 149:src/TrapHandler.cpp ****         if (irq == CONSOLE_IRQ){
+ 663              		.loc 1 149 9 is_stmt 1
+ 664 0364 9307A000 		li	a5,10
+ 665 0368 630AF500 		beq	a0,a5,.L37
+ 666              	.LVL80:
+ 667              	.L30:
+ 152:src/TrapHandler.cpp ****         plic_complete(irq);
+ 668              		.loc 1 152 9
+ 152:src/TrapHandler.cpp ****         plic_complete(irq);
+ 669              		.loc 1 152 22 is_stmt 0
+ 670 036c 13850400 		mv	a0,s1
+ 671 0370 97000000 		call	plic_complete@plt
+ 671      E7800000 
+ 672              	.LVL81:
+ 673              	.LBE29:
+ 674              	.LBE32:
+GAS LISTING /tmp/cchYazkt.s 			page 20
+
+
+ 675              	.LBE49:
+ 676              	.LBE53:
+ 677              		.loc 1 154 1
+ 678 0378 6FF0DFD3 		j	.L7
+ 679              	.LVL82:
+ 680              	.L37:
+ 681              	.LBB54:
+ 682              	.LBB50:
+ 683              	.LBB33:
+ 684              	.LBB30:
+ 150:src/TrapHandler.cpp ****             Console::handleInterrupt();
+ 685              		.loc 1 150 13 is_stmt 1
+ 150:src/TrapHandler.cpp ****             Console::handleInterrupt();
+ 686              		.loc 1 150 37 is_stmt 0
+ 687 037c 97000000 		call	_ZN6kernel7Console15handleInterruptEv@plt
+ 687      E7800000 
+ 688              	.LVL83:
+ 689 0384 6FF09FFE 		j	.L30
+ 690              	.LBE30:
+ 691              	.LBE33:
+ 692              	.LBE50:
+ 693              	.LBE54:
+ 694              		.cfi_endproc
+ 695              	.LFE14:
+ 697              		.bss
+ 698              		.align	3
+ 699              		.set	.LANCHOR0,. + 0
+ 702              	_ZL8toDelete:
+ 703 0000 00000000 		.zero	8
+ 703      00000000 
+ 704              		.text
+ 705              	.Letext0:
+ 706              		.file 3 "src/../lib/hw.h"
+ 707              		.file 4 "src/../h/MemoryAllocator.h"
+ 708              		.file 5 "src/../h/../h/syscall_c.h"
+ 709              		.file 6 "src/../h/SemStatus.h"
+ 710              		.file 7 "src/../h/ThreadState.h"
+ 711              		.file 8 "src/../h/Scheduler.h"
+ 712              		.file 9 "src/../h/Semaphore.h"
+ 713              		.file 10 "src/../h/Console.h"
+ 714              		.file 11 "src/../h/OPCodes.h"
+GAS LISTING /tmp/cchYazkt.s 			page 21
+
+
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 TrapHandler.cpp
+     /tmp/cchYazkt.s:8      .text:0000000000000000 _ZL15cleanupFinishedv
+     /tmp/cchYazkt.s:12     .text:0000000000000000 .L0 
+     /tmp/cchYazkt.s:13     .text:0000000000000000 .L0 
+     /tmp/cchYazkt.s:14     .text:0000000000000000 .L0 
+     /tmp/cchYazkt.s:15     .text:0000000000000000 .L0 
+     /tmp/cchYazkt.s:17     .text:0000000000000008 .L0 
+     /tmp/cchYazkt.s:19     .text:000000000000000c .L0 
+     /tmp/cchYazkt.s:20     .text:0000000000000010 .L0 
+     /tmp/cchYazkt.s:24     .text:000000000000001c .L0 
+     /tmp/cchYazkt.s:25     .text:000000000000001c .L0 
+     /tmp/cchYazkt.s:26     .text:000000000000001c .L0 
+     /tmp/cchYazkt.s:28     .text:0000000000000020 .L0 
+     /tmp/cchYazkt.s:34     .text:0000000000000020 .L0 
+     /tmp/cchYazkt.s:37     .text:0000000000000020 .L0 
+     /tmp/cchYazkt.s:38     .text:0000000000000020 .L0 
+     /tmp/cchYazkt.s:42     .text:000000000000002c .L0 
+     /tmp/cchYazkt.s:43     .text:000000000000002c .L0 
+     /tmp/cchYazkt.s:48     .text:0000000000000040 .L0 
+     /tmp/cchYazkt.s:49     .text:0000000000000040 .L0 
+     /tmp/cchYazkt.s:51     .text:0000000000000044 .L0 
+     /tmp/cchYazkt.s:52     .text:0000000000000048 .L0 
+     /tmp/cchYazkt.s:54     .text:000000000000004c .L0 
+     /tmp/cchYazkt.s:55     .text:000000000000004c .L0 
+     /tmp/cchYazkt.s:57     .text:0000000000000050 .L0 
+     /tmp/cchYazkt.s:59     .text:0000000000000054 .L0 
+     /tmp/cchYazkt.s:63     .text:000000000000005c .L0 
+     /tmp/cchYazkt.s:69     .text:000000000000005c TrapHandler
+     /tmp/cchYazkt.s:72     .text:000000000000005c .L0 
+     /tmp/cchYazkt.s:74     .text:000000000000005c .L0 
+     /tmp/cchYazkt.s:75     .text:0000000000000060 .L0 
+     /tmp/cchYazkt.s:81     .text:0000000000000074 .L0 
+     /tmp/cchYazkt.s:82     .text:0000000000000074 .L0 
+     /tmp/cchYazkt.s:83     .text:0000000000000074 .L0 
+     /tmp/cchYazkt.s:84     .text:0000000000000074 .L0 
+     /tmp/cchYazkt.s:85     .text:0000000000000074 .L0 
+     /tmp/cchYazkt.s:87     .text:0000000000000078 .L0 
+     /tmp/cchYazkt.s:90     .text:000000000000007c .L0 
+     /tmp/cchYazkt.s:91     .text:000000000000007c .L0 
+     /tmp/cchYazkt.s:94     .text:0000000000000084 .L0 
+     /tmp/cchYazkt.s:95     .text:0000000000000084 .L0 
+ src/TrapHandler.cpp:26     .text:0000000000000084 .L0 
+     /tmp/cchYazkt.s:104    .text:0000000000000088 .L0 
+     /tmp/cchYazkt.s:105    .text:0000000000000088 .L0 
+     /tmp/cchYazkt.s:107    .text:000000000000008c .L0 
+     /tmp/cchYazkt.s:113    .text:0000000000000094 .L0 
+     /tmp/cchYazkt.s:123    .text:00000000000000a4 .L0 
+     /tmp/cchYazkt.s:133    .text:00000000000000b4 .L0 
+     /tmp/cchYazkt.s:134    .text:00000000000000b8 .L0 
+     /tmp/cchYazkt.s:135    .text:00000000000000b8 .L0 
+     /tmp/cchYazkt.s:137    .text:00000000000000bc .L0 
+     /tmp/cchYazkt.s:138    .text:00000000000000bc .L0 
+     /tmp/cchYazkt.s:140    .text:00000000000000c0 .L0 
+     /tmp/cchYazkt.s:142    .text:00000000000000c4 .L0 
+     /tmp/cchYazkt.s:144    .text:00000000000000c8 .L0 
+     /tmp/cchYazkt.s:146    .text:00000000000000cc .L0 
+GAS LISTING /tmp/cchYazkt.s 			page 22
+
+
+     /tmp/cchYazkt.s:150    .text:00000000000000d0 .L0 
+     /tmp/cchYazkt.s:154    .text:00000000000000d0 .L0 
+     /tmp/cchYazkt.s:155    .text:00000000000000d0 .L0 
+     /tmp/cchYazkt.s:159    .text:00000000000000dc .L0 
+     /tmp/cchYazkt.s:160    .text:00000000000000dc .L0 
+     /tmp/cchYazkt.s:163    .text:00000000000000e0 .L0 
+     /tmp/cchYazkt.s:164    .text:00000000000000e0 .L0 
+     /tmp/cchYazkt.s:167    .text:00000000000000e4 .L0 
+     /tmp/cchYazkt.s:252    .text:0000000000000108 .L0 
+     /tmp/cchYazkt.s:254    .text:0000000000000108 .L0 
+     /tmp/cchYazkt.s:255    .text:0000000000000108 .L0 
+     /tmp/cchYazkt.s:256    .text:0000000000000108 .L0 
+     /tmp/cchYazkt.s:260    .text:0000000000000114 .L0 
+     /tmp/cchYazkt.s:261    .text:0000000000000114 .L0 
+     /tmp/cchYazkt.s:263    .text:0000000000000118 .L0 
+     /tmp/cchYazkt.s:268    .text:000000000000011c .L0 
+     /tmp/cchYazkt.s:270    .text:000000000000011c .L0 
+     /tmp/cchYazkt.s:271    .text:000000000000011c .L0 
+     /tmp/cchYazkt.s:272    .text:000000000000011c .L0 
+     /tmp/cchYazkt.s:276    .text:0000000000000128 .L0 
+     /tmp/cchYazkt.s:277    .text:0000000000000128 .L0 
+     /tmp/cchYazkt.s:279    .text:000000000000012c .L0 
+     /tmp/cchYazkt.s:284    .text:0000000000000130 .L0 
+     /tmp/cchYazkt.s:286    .text:0000000000000130 .L0 
+     /tmp/cchYazkt.s:287    .text:0000000000000130 .L0 
+     /tmp/cchYazkt.s:288    .text:0000000000000130 .L0 
+     /tmp/cchYazkt.s:295    .text:000000000000013c .L0 
+     /tmp/cchYazkt.s:296    .text:000000000000013c .L0 
+     /tmp/cchYazkt.s:297    .text:000000000000013c .L0 
+     /tmp/cchYazkt.s:303    .text:0000000000000144 .L0 
+     /tmp/cchYazkt.s:304    .text:0000000000000144 .L0 
+     /tmp/cchYazkt.s:306    .text:000000000000014c .L0 
+     /tmp/cchYazkt.s:307    .text:000000000000014c .L0 
+     /tmp/cchYazkt.s:312    .text:0000000000000158 .L0 
+     /tmp/cchYazkt.s:313    .text:0000000000000158 .L0 
+     /tmp/cchYazkt.s:316    .text:0000000000000160 .L0 
+     /tmp/cchYazkt.s:317    .text:0000000000000160 .L0 
+     /tmp/cchYazkt.s:322    .text:0000000000000170 .L0 
+     /tmp/cchYazkt.s:327    .text:0000000000000174 .L0 
+     /tmp/cchYazkt.s:329    .text:0000000000000174 .L0 
+     /tmp/cchYazkt.s:330    .text:0000000000000174 .L0 
+     /tmp/cchYazkt.s:331    .text:0000000000000174 .L0 
+     /tmp/cchYazkt.s:336    .text:0000000000000180 .L0 
+     /tmp/cchYazkt.s:337    .text:0000000000000180 .L0 
+     /tmp/cchYazkt.s:340    .text:0000000000000188 .L0 
+     /tmp/cchYazkt.s:341    .text:0000000000000188 .L0 
+     /tmp/cchYazkt.s:346    .text:0000000000000194 .L0 
+     /tmp/cchYazkt.s:347    .text:0000000000000194 .L0 
+     /tmp/cchYazkt.s:350    .text:000000000000019c .L0 
+     /tmp/cchYazkt.s:351    .text:000000000000019c .L0 
+     /tmp/cchYazkt.s:356    .text:00000000000001ac .L0 
+     /tmp/cchYazkt.s:361    .text:00000000000001b0 .L0 
+     /tmp/cchYazkt.s:363    .text:00000000000001b0 .L0 
+     /tmp/cchYazkt.s:364    .text:00000000000001b0 .L0 
+     /tmp/cchYazkt.s:365    .text:00000000000001b0 .L0 
+     /tmp/cchYazkt.s:366    .text:00000000000001b0 .L0 
+     /tmp/cchYazkt.s:367    .text:00000000000001b0 .L0 
+GAS LISTING /tmp/cchYazkt.s 			page 23
+
+
+     /tmp/cchYazkt.s:368    .text:00000000000001b0 .L0 
+     /tmp/cchYazkt.s:373    .text:00000000000001c0 .L0 
+     /tmp/cchYazkt.s:375    .text:00000000000001c4 .L0 
+     /tmp/cchYazkt.s:376    .text:00000000000001c4 .L0 
+     /tmp/cchYazkt.s:377    .text:00000000000001c4 .L0 
+     /tmp/cchYazkt.s:379    .text:00000000000001c8 .L0 
+     /tmp/cchYazkt.s:380    .text:00000000000001c8 .L0 
+     /tmp/cchYazkt.s:383    .text:00000000000001d0 .L0 
+     /tmp/cchYazkt.s:384    .text:00000000000001d0 .L0 
+     /tmp/cchYazkt.s:386    .text:00000000000001d4 .L0 
+     /tmp/cchYazkt.s:390    .text:00000000000001d8 .L0 
+     /tmp/cchYazkt.s:391    .text:00000000000001d8 .L0 
+     /tmp/cchYazkt.s:394    .text:00000000000001e0 .L0 
+     /tmp/cchYazkt.s:399    .text:00000000000001e4 .L0 
+     /tmp/cchYazkt.s:400    .text:00000000000001e4 .L0 
+     /tmp/cchYazkt.s:401    .text:00000000000001e4 .L0 
+     /tmp/cchYazkt.s:402    .text:00000000000001e4 .L0 
+     /tmp/cchYazkt.s:407    .text:00000000000001ec .L0 
+     /tmp/cchYazkt.s:408    .text:00000000000001ec .L0 
+     /tmp/cchYazkt.s:413    .text:00000000000001f0 .L0 
+     /tmp/cchYazkt.s:415    .text:00000000000001f4 .L0 
+     /tmp/cchYazkt.s:419    .text:00000000000001f8 .L0 
+     /tmp/cchYazkt.s:420    .text:00000000000001f8 .L0 
+     /tmp/cchYazkt.s:421    .text:00000000000001f8 .L0 
+     /tmp/cchYazkt.s:422    .text:00000000000001f8 .L0 
+     /tmp/cchYazkt.s:429    .text:0000000000000210 .L0 
+     /tmp/cchYazkt.s:430    .text:0000000000000210 .L0 
+     /tmp/cchYazkt.s:432    .text:0000000000000214 .L0 
+     /tmp/cchYazkt.s:436    .text:0000000000000218 .L0 
+     /tmp/cchYazkt.s:438    .text:0000000000000218 .L0 
+     /tmp/cchYazkt.s:439    .text:0000000000000218 .L0 
+     /tmp/cchYazkt.s:440    .text:0000000000000218 .L0 
+     /tmp/cchYazkt.s:445    .text:0000000000000228 .L0 
+     /tmp/cchYazkt.s:446    .text:0000000000000228 .L0 
+     /tmp/cchYazkt.s:448    .text:000000000000022c .L0 
+     /tmp/cchYazkt.s:453    .text:0000000000000230 .L0 
+     /tmp/cchYazkt.s:455    .text:0000000000000230 .L0 
+     /tmp/cchYazkt.s:456    .text:0000000000000230 .L0 
+     /tmp/cchYazkt.s:457    .text:0000000000000230 .L0 
+     /tmp/cchYazkt.s:458    .text:0000000000000230 .L0 
+     /tmp/cchYazkt.s:459    .text:0000000000000230 .L0 
+     /tmp/cchYazkt.s:463    .text:000000000000023c .L0 
+     /tmp/cchYazkt.s:465    .text:0000000000000240 .L0 
+     /tmp/cchYazkt.s:466    .text:0000000000000240 .L0 
+     /tmp/cchYazkt.s:467    .text:0000000000000240 .L0 
+     /tmp/cchYazkt.s:469    .text:0000000000000244 .L0 
+     /tmp/cchYazkt.s:470    .text:0000000000000244 .L0 
+     /tmp/cchYazkt.s:472    .text:0000000000000248 .L0 
+     /tmp/cchYazkt.s:475    .text:000000000000024c .L0 
+     /tmp/cchYazkt.s:476    .text:000000000000024c .L0 
+     /tmp/cchYazkt.s:479    .text:0000000000000254 .L0 
+     /tmp/cchYazkt.s:484    .text:0000000000000258 .L0 
+     /tmp/cchYazkt.s:485    .text:0000000000000258 .L0 
+     /tmp/cchYazkt.s:486    .text:0000000000000258 .L0 
+     /tmp/cchYazkt.s:487    .text:0000000000000258 .L0 
+     /tmp/cchYazkt.s:491    .text:0000000000000264 .L0 
+     /tmp/cchYazkt.s:493    .text:0000000000000268 .L0 
+GAS LISTING /tmp/cchYazkt.s 			page 24
+
+
+     /tmp/cchYazkt.s:497    .text:000000000000026c .L0 
+     /tmp/cchYazkt.s:498    .text:000000000000026c .L0 
+     /tmp/cchYazkt.s:499    .text:000000000000026c .L0 
+     /tmp/cchYazkt.s:500    .text:000000000000026c .L0 
+     /tmp/cchYazkt.s:504    .text:0000000000000278 .L0 
+     /tmp/cchYazkt.s:506    .text:000000000000027c .L0 
+     /tmp/cchYazkt.s:510    .text:0000000000000280 .L0 
+     /tmp/cchYazkt.s:511    .text:0000000000000280 .L0 
+     /tmp/cchYazkt.s:512    .text:0000000000000280 .L0 
+     /tmp/cchYazkt.s:513    .text:0000000000000280 .L0 
+     /tmp/cchYazkt.s:517    .text:000000000000028c .L0 
+     /tmp/cchYazkt.s:519    .text:0000000000000290 .L0 
+     /tmp/cchYazkt.s:523    .text:0000000000000294 .L0 
+     /tmp/cchYazkt.s:525    .text:0000000000000294 .L0 
+     /tmp/cchYazkt.s:526    .text:0000000000000294 .L0 
+     /tmp/cchYazkt.s:527    .text:0000000000000294 .L0 
+     /tmp/cchYazkt.s:528    .text:0000000000000294 .L0 
+     /tmp/cchYazkt.s:533    .text:00000000000002a0 .L0 
+     /tmp/cchYazkt.s:534    .text:00000000000002a0 .L0 
+     /tmp/cchYazkt.s:538    .text:00000000000002ac .L0 
+     /tmp/cchYazkt.s:539    .text:00000000000002ac .L0 
+     /tmp/cchYazkt.s:544    .text:00000000000002b8 .L0 
+     /tmp/cchYazkt.s:545    .text:00000000000002b8 .L0 
+     /tmp/cchYazkt.s:548    .text:00000000000002c0 .L0 
+     /tmp/cchYazkt.s:549    .text:00000000000002c0 .L0 
+     /tmp/cchYazkt.s:554    .text:00000000000002d0 .L0 
+     /tmp/cchYazkt.s:555    .text:00000000000002d0 .L0 
+     /tmp/cchYazkt.s:557    .text:00000000000002d4 .L0 
+     /tmp/cchYazkt.s:562    .text:00000000000002d8 .L0 
+     /tmp/cchYazkt.s:563    .text:00000000000002d8 .L0 
+     /tmp/cchYazkt.s:564    .text:00000000000002d8 .L0 
+     /tmp/cchYazkt.s:565    .text:00000000000002d8 .L0 
+     /tmp/cchYazkt.s:568    .text:00000000000002e0 .L0 
+     /tmp/cchYazkt.s:570    .text:00000000000002e4 .L0 
+     /tmp/cchYazkt.s:574    .text:00000000000002e8 .L0 
+     /tmp/cchYazkt.s:575    .text:00000000000002e8 .L0 
+     /tmp/cchYazkt.s:576    .text:00000000000002e8 .L0 
+     /tmp/cchYazkt.s:577    .text:00000000000002e8 .L0 
+     /tmp/cchYazkt.s:581    .text:00000000000002f4 .L0 
+     /tmp/cchYazkt.s:582    .text:00000000000002f4 .L0 
+     /tmp/cchYazkt.s:584    .text:00000000000002f8 .L0 
+     /tmp/cchYazkt.s:588    .text:00000000000002fc .L0 
+     /tmp/cchYazkt.s:589    .text:00000000000002fc .L0 
+     /tmp/cchYazkt.s:590    .text:00000000000002fc .L0 
+     /tmp/cchYazkt.s:594    .text:0000000000000304 .L0 
+     /tmp/cchYazkt.s:602    .text:0000000000000308 .L0 
+     /tmp/cchYazkt.s:603    .text:0000000000000308 .L0 
+ src/TrapHandler.cpp:134    .text:0000000000000308 .L0 
+     /tmp/cchYazkt.s:610    .text:000000000000030c .L0 
+     /tmp/cchYazkt.s:612    .text:000000000000030c .L0 
+     /tmp/cchYazkt.s:615    .text:0000000000000310 .L0 
+ src/TrapHandler.cpp:136    .text:0000000000000310 .L0 
+     /tmp/cchYazkt.s:621    .text:0000000000000314 .L0 
+     /tmp/cchYazkt.s:623    .text:0000000000000314 .L0 
+     /tmp/cchYazkt.s:626    .text:000000000000031c .L0 
+     /tmp/cchYazkt.s:627    .text:000000000000031c .L0 
+     /tmp/cchYazkt.s:632    .text:0000000000000328 .L0 
+GAS LISTING /tmp/cchYazkt.s 			page 25
+
+
+     /tmp/cchYazkt.s:633    .text:0000000000000328 .L0 
+     /tmp/cchYazkt.s:636    .text:0000000000000330 .L0 
+     /tmp/cchYazkt.s:637    .text:0000000000000330 .L0 
+     /tmp/cchYazkt.s:642    .text:000000000000033c .L0 
+     /tmp/cchYazkt.s:643    .text:000000000000033c .L0 
+     /tmp/cchYazkt.s:646    .text:0000000000000344 .L0 
+     /tmp/cchYazkt.s:647    .text:0000000000000344 .L0 
+     /tmp/cchYazkt.s:658    .text:0000000000000358 .L0 
+     /tmp/cchYazkt.s:659    .text:0000000000000358 .L0 
+     /tmp/cchYazkt.s:664    .text:0000000000000364 .L0 
+     /tmp/cchYazkt.s:669    .text:000000000000036c .L0 
+     /tmp/cchYazkt.s:670    .text:000000000000036c .L0 
+     /tmp/cchYazkt.s:678    .text:0000000000000378 .L0 
+     /tmp/cchYazkt.s:686    .text:000000000000037c .L0 
+     /tmp/cchYazkt.s:687    .text:000000000000037c .L0 
+     /tmp/cchYazkt.s:694    .text:0000000000000388 .L0 
+     /tmp/cchYazkt.s:699    .bss:0000000000000000 .LANCHOR0
+     /tmp/cchYazkt.s:702    .bss:0000000000000000 _ZL8toDelete
+     /tmp/cchYazkt.s:715    .text:0000000000000388 .L0 
+     /tmp/cchYazkt.s:15     .text:0000000000000000 .L0 
+     /tmp/cchYazkt.s:43     .text:000000000000002c .L0 
+     /tmp/cchYazkt.s:180    .rodata:0000000000000000 .L11
+     /tmp/cchYazkt.s:172    .text:00000000000000f0 .L0 
+     /tmp/cchYazkt.s:304    .text:0000000000000144 .L0 
+     /tmp/cchYazkt.s:61     .text:0000000000000058 .L4
+     /tmp/cchYazkt.s:149    .text:00000000000000d0 .L32
+     /tmp/cchYazkt.s:596    .text:0000000000000308 .L33
+     /tmp/cchYazkt.s:654    .text:0000000000000358 .L34
+     /tmp/cchYazkt.s:586    .text:00000000000002fc .L9
+     /tmp/cchYazkt.s:128    .text:00000000000000b4 .L7
+     /tmp/cchYazkt.s:388    .text:00000000000001d8 .L35
+     /tmp/cchYazkt.s:473    .text:000000000000024c .L36
+     /tmp/cchYazkt.s:680    .text:000000000000037c .L37
+     /tmp/cchYazkt.s:667    .text:000000000000036c .L30
+     /tmp/cchYazkt.s:249    .text:0000000000000108 .L25
+     /tmp/cchYazkt.s:265    .text:000000000000011c .L24
+     /tmp/cchYazkt.s:358    .text:00000000000001b0 .L23
+     /tmp/cchYazkt.s:281    .text:0000000000000130 .L22
+     /tmp/cchYazkt.s:324    .text:0000000000000174 .L21
+     /tmp/cchYazkt.s:396    .text:00000000000001e4 .L20
+     /tmp/cchYazkt.s:417    .text:00000000000001f8 .L19
+     /tmp/cchYazkt.s:434    .text:0000000000000218 .L18
+     /tmp/cchYazkt.s:450    .text:0000000000000230 .L17
+     /tmp/cchYazkt.s:481    .text:0000000000000258 .L16
+     /tmp/cchYazkt.s:495    .text:000000000000026c .L15
+     /tmp/cchYazkt.s:508    .text:0000000000000280 .L14
+     /tmp/cchYazkt.s:521    .text:0000000000000294 .L13
+     /tmp/cchYazkt.s:559    .text:00000000000002d8 .L12
+     /tmp/cchYazkt.s:572    .text:00000000000002e8 .L10
+     /tmp/cchYazkt.s:2484   .debug_abbrev:0000000000000000 .Ldebug_abbrev0
+     /tmp/cchYazkt.s:4258   .debug_str:00000000000008f5 .LASF177
+     /tmp/cchYazkt.s:4076   .debug_str:000000000000033c .LASF178
+     /tmp/cchYazkt.s:4080   .debug_str:000000000000035d .LASF179
+     /tmp/cchYazkt.s:5      .text:0000000000000000 .Ltext0
+     /tmp/cchYazkt.s:705    .text:0000000000000388 .Letext0
+     /tmp/cchYazkt.s:3958   .debug_line:0000000000000000 .Ldebug_line0
+     /tmp/cchYazkt.s:4248   .debug_str:0000000000000896 .LASF0
+GAS LISTING /tmp/cchYazkt.s 			page 26
+
+
+     /tmp/cchYazkt.s:4102   .debug_str:000000000000042e .LASF1
+     /tmp/cchYazkt.s:4194   .debug_str:000000000000075f .LASF2
+     /tmp/cchYazkt.s:4202   .debug_str:000000000000078d .LASF4
+     /tmp/cchYazkt.s:4090   .debug_str:00000000000003c6 .LASF3
+     /tmp/cchYazkt.s:3966   .debug_str:0000000000000018 .LASF5
+     /tmp/cchYazkt.s:4168   .debug_str:000000000000064f .LASF6
+     /tmp/cchYazkt.s:4096   .debug_str:00000000000003fb .LASF7
+     /tmp/cchYazkt.s:4054   .debug_str:000000000000029f .LASF8
+     /tmp/cchYazkt.s:4062   .debug_str:00000000000002ef .LASF9
+     /tmp/cchYazkt.s:3998   .debug_str:000000000000011b .LASF10
+     /tmp/cchYazkt.s:4040   .debug_str:0000000000000248 .LASF11
+     /tmp/cchYazkt.s:4008   .debug_str:0000000000000158 .LASF12
+     /tmp/cchYazkt.s:3996   .debug_str:000000000000010b .LASF13
+     /tmp/cchYazkt.s:4236   .debug_str:000000000000086c .LASF14
+     /tmp/cchYazkt.s:4034   .debug_str:0000000000000217 .LASF15
+     /tmp/cchYazkt.s:4222   .debug_str:0000000000000807 .LASF16
+     /tmp/cchYazkt.s:4124   .debug_str:00000000000004bc .LASF40
+     /tmp/cchYazkt.s:4010   .debug_str:0000000000000168 .LASF17
+     /tmp/cchYazkt.s:4230   .debug_str:000000000000084d .LASF18
+     /tmp/cchYazkt.s:4164   .debug_str:0000000000000619 .LASF26
+     /tmp/cchYazkt.s:4232   .debug_str:0000000000000856 .LASF49
+     /tmp/cchYazkt.s:4100   .debug_str:0000000000000429 .LASF19
+     /tmp/cchYazkt.s:4000   .debug_str:000000000000012a .LASF20
+     /tmp/cchYazkt.s:4294   .debug_str:0000000000000ada .LASF21
+     /tmp/cchYazkt.s:4268   .debug_str:0000000000000a03 .LASF106
+     /tmp/cchYazkt.s:4086   .debug_str:0000000000000394 .LASF108
+     /tmp/cchYazkt.s:3960   .debug_str:0000000000000000 .LASF22
+     /tmp/cchYazkt.s:4106   .debug_str:0000000000000447 .LASF24
+     /tmp/cchYazkt.s:4254   .debug_str:00000000000008e5 .LASF23
+     /tmp/cchYazkt.s:4306   .debug_str:0000000000000b2a .LASF25
+     /tmp/cchYazkt.s:3972   .debug_str:0000000000000063 .LASF27
+     /tmp/cchYazkt.s:4072   .debug_str:000000000000032f .LASF28
+     /tmp/cchYazkt.s:4192   .debug_str:0000000000000722 .LASF30
+     /tmp/cchYazkt.s:3962   .debug_str:0000000000000007 .LASF29
+     /tmp/cchYazkt.s:4136   .debug_str:0000000000000531 .LASF31
+     /tmp/cchYazkt.s:4150   .debug_str:00000000000005dc .LASF32
+     /tmp/cchYazkt.s:4282   .debug_str:0000000000000a95 .LASF33
+     /tmp/cchYazkt.s:4006   .debug_str:0000000000000151 .LASF34
+     /tmp/cchYazkt.s:4064   .debug_str:00000000000002fd .LASF35
+     /tmp/cchYazkt.s:4298   .debug_str:0000000000000ae8 .LASF36
+     /tmp/cchYazkt.s:3974   .debug_str:000000000000007c .LASF38
+     /tmp/cchYazkt.s:4318   .debug_str:0000000000000bca .LASF37
+     /tmp/cchYazkt.s:4242   .debug_str:0000000000000887 .LASF39
+     /tmp/cchYazkt.s:4126   .debug_str:00000000000004c9 .LASF41
+     /tmp/cchYazkt.s:4110   .debug_str:000000000000046a .LASF42
+     /tmp/cchYazkt.s:4296   .debug_str:0000000000000ae1 .LASF43
+     /tmp/cchYazkt.s:4134   .debug_str:0000000000000525 .LASF44
+     /tmp/cchYazkt.s:3990   .debug_str:00000000000000e8 .LASF45
+     /tmp/cchYazkt.s:4212   .debug_str:00000000000007d2 .LASF46
+     /tmp/cchYazkt.s:4122   .debug_str:00000000000004b4 .LASF47
+     /tmp/cchYazkt.s:3984   .debug_str:00000000000000a3 .LASF48
+     /tmp/cchYazkt.s:4328   .debug_str:0000000000000bff .LASF180
+     /tmp/cchYazkt.s:4240   .debug_str:000000000000087f .LASF50
+     /tmp/cchYazkt.s:4066   .debug_str:0000000000000306 .LASF51
+     /tmp/cchYazkt.s:4280   .debug_str:0000000000000a8d .LASF52
+     /tmp/cchYazkt.s:4310   .debug_str:0000000000000b4f .LASF53
+     /tmp/cchYazkt.s:4218   .debug_str:00000000000007f1 .LASF54
+GAS LISTING /tmp/cchYazkt.s 			page 27
+
+
+     /tmp/cchYazkt.s:4188   .debug_str:00000000000006fc .LASF55
+     /tmp/cchYazkt.s:4234   .debug_str:000000000000085f .LASF56
+     /tmp/cchYazkt.s:3968   .debug_str:000000000000001f .LASF57
+     /tmp/cchYazkt.s:4038   .debug_str:0000000000000237 .LASF98
+     /tmp/cchYazkt.s:4250   .debug_str:00000000000008a3 .LASF100
+     /tmp/cchYazkt.s:3988   .debug_str:00000000000000d5 .LASF58
+     /tmp/cchYazkt.s:4172   .debug_str:0000000000000670 .LASF59
+     /tmp/cchYazkt.s:4324   .debug_str:0000000000000bec .LASF60
+     /tmp/cchYazkt.s:4128   .debug_str:00000000000004d3 .LASF61
+     /tmp/cchYazkt.s:4292   .debug_str:0000000000000ad5 .LASF62
+     /tmp/cchYazkt.s:4070   .debug_str:0000000000000316 .LASF64
+     /tmp/cchYazkt.s:4210   .debug_str:00000000000007c9 .LASF63
+     /tmp/cchYazkt.s:4094   .debug_str:00000000000003dd .LASF65
+     /tmp/cchYazkt.s:4260   .debug_str:00000000000009b9 .LASF66
+     /tmp/cchYazkt.s:4300   .debug_str:0000000000000af1 .LASF67
+     /tmp/cchYazkt.s:4088   .debug_str:00000000000003be .LASF68
+     /tmp/cchYazkt.s:4138   .debug_str:0000000000000560 .LASF69
+     /tmp/cchYazkt.s:4140   .debug_str:000000000000057c .LASF70
+     /tmp/cchYazkt.s:4252   .debug_str:00000000000008c9 .LASF71
+     /tmp/cchYazkt.s:4198   .debug_str:0000000000000779 .LASF72
+     /tmp/cchYazkt.s:3986   .debug_str:00000000000000ac .LASF73
+     /tmp/cchYazkt.s:4304   .debug_str:0000000000000b24 .LASF74
+     /tmp/cchYazkt.s:4112   .debug_str:0000000000000473 .LASF75
+     /tmp/cchYazkt.s:4154   .debug_str:00000000000005f4 .LASF76
+     /tmp/cchYazkt.s:4264   .debug_str:00000000000009d4 .LASF77
+     /tmp/cchYazkt.s:4228   .debug_str:0000000000000845 .LASF78
+     /tmp/cchYazkt.s:4330   .debug_str:0000000000000c06 .LASF79
+     /tmp/cchYazkt.s:4246   .debug_str:0000000000000891 .LASF80
+     /tmp/cchYazkt.s:4206   .debug_str:00000000000007b0 .LASF81
+     /tmp/cchYazkt.s:3994   .debug_str:00000000000000fa .LASF82
+     /tmp/cchYazkt.s:4116   .debug_str:0000000000000498 .LASF83
+     /tmp/cchYazkt.s:4024   .debug_str:00000000000001e8 .LASF84
+     /tmp/cchYazkt.s:4078   .debug_str:0000000000000350 .LASF85
+     /tmp/cchYazkt.s:4028   .debug_str:00000000000001f8 .LASF86
+     /tmp/cchYazkt.s:4208   .debug_str:00000000000007bf .LASF87
+     /tmp/cchYazkt.s:4278   .debug_str:0000000000000a83 .LASF88
+     /tmp/cchYazkt.s:4084   .debug_str:0000000000000386 .LASF89
+     /tmp/cchYazkt.s:4262   .debug_str:00000000000009cc .LASF90
+     /tmp/cchYazkt.s:4036   .debug_str:000000000000022d .LASF91
+     /tmp/cchYazkt.s:4026   .debug_str:00000000000001ee .LASF92
+     /tmp/cchYazkt.s:4020   .debug_str:00000000000001b9 .LASF93
+     /tmp/cchYazkt.s:4042   .debug_str:0000000000000257 .LASF94
+     /tmp/cchYazkt.s:4082   .debug_str:0000000000000377 .LASF95
+     /tmp/cchYazkt.s:4186   .debug_str:00000000000006f0 .LASF96
+     /tmp/cchYazkt.s:4052   .debug_str:0000000000000295 .LASF97
+     /tmp/cchYazkt.s:4050   .debug_str:000000000000026f .LASF181
+     /tmp/cchYazkt.s:4098   .debug_str:000000000000040e .LASF182
+     /tmp/cchYazkt.s:4058   .debug_str:00000000000002c1 .LASF99
+     /tmp/cchYazkt.s:4060   .debug_str:00000000000002cc .LASF101
+     /tmp/cchYazkt.s:4032   .debug_str:000000000000020c .LASF102
+     /tmp/cchYazkt.s:4314   .debug_str:0000000000000b95 .LASF104
+     /tmp/cchYazkt.s:4182   .debug_str:00000000000006e0 .LASF103
+     /tmp/cchYazkt.s:4274   .debug_str:0000000000000a48 .LASF105
+     /tmp/cchYazkt.s:4120   .debug_str:00000000000004ad .LASF107
+     /tmp/cchYazkt.s:4286   .debug_str:0000000000000a9f .LASF109
+     /tmp/cchYazkt.s:4152   .debug_str:00000000000005e6 .LASF110
+     /tmp/cchYazkt.s:4132   .debug_str:00000000000004f4 .LASF111
+GAS LISTING /tmp/cchYazkt.s 			page 28
+
+
+     /tmp/cchYazkt.s:4114   .debug_str:000000000000048e .LASF112
+     /tmp/cchYazkt.s:4302   .debug_str:0000000000000b1a .LASF113
+     /tmp/cchYazkt.s:4256   .debug_str:00000000000008ed .LASF114
+     /tmp/cchYazkt.s:4326   .debug_str:0000000000000bf2 .LASF115
+     /tmp/cchYazkt.s:3978   .debug_str:0000000000000089 .LASF116
+     /tmp/cchYazkt.s:4176   .debug_str:00000000000006b0 .LASF117
+     /tmp/cchYazkt.s:4190   .debug_str:0000000000000712 .LASF118
+     /tmp/cchYazkt.s:4022   .debug_str:00000000000001c0 .LASF119
+     /tmp/cchYazkt.s:4266   .debug_str:00000000000009f2 .LASF120
+     /tmp/cchYazkt.s:4142   .debug_str:0000000000000583 .LASF121
+     /tmp/cchYazkt.s:4108   .debug_str:0000000000000465 .LASF122
+     /tmp/cchYazkt.s:4204   .debug_str:0000000000000794 .LASF123
+     /tmp/cchYazkt.s:4238   .debug_str:0000000000000878 .LASF124
+     /tmp/cchYazkt.s:4144   .debug_str:00000000000005af .LASF125
+     /tmp/cchYazkt.s:4004   .debug_str:0000000000000138 .LASF126
+     /tmp/cchYazkt.s:4214   .debug_str:00000000000007da .LASF127
+     /tmp/cchYazkt.s:4012   .debug_str:000000000000016d .LASF128
+     /tmp/cchYazkt.s:4074   .debug_str:0000000000000336 .LASF129
+     /tmp/cchYazkt.s:4016   .debug_str:0000000000000189 .LASF130
+     /tmp/cchYazkt.s:4160   .debug_str:0000000000000606 .LASF131
+     /tmp/cchYazkt.s:4270   .debug_str:0000000000000a15 .LASF132
+     /tmp/cchYazkt.s:4156   .debug_str:00000000000005f9 .LASF183
+     /tmp/cchYazkt.s:4216   .debug_str:00000000000007e6 .LASF133
+     /tmp/cchYazkt.s:4226   .debug_str:0000000000000824 .LASF134
+     /tmp/cchYazkt.s:4272   .debug_str:0000000000000a38 .LASF135
+     /tmp/cchYazkt.s:4166   .debug_str:0000000000000629 .LASF136
+     /tmp/cchYazkt.s:4308   .debug_str:0000000000000b4a .LASF137
+     /tmp/cchYazkt.s:3970   .debug_str:0000000000000049 .LASF138
+     /tmp/cchYazkt.s:4158   .debug_str:0000000000000601 .LASF139
+     /tmp/cchYazkt.s:4178   .debug_str:00000000000006ba .LASF140
+     /tmp/cchYazkt.s:4334   .debug_str:0000000000000c2c .LASF141
+     /tmp/cchYazkt.s:4130   .debug_str:00000000000004ed .LASF142
+     /tmp/cchYazkt.s:3982   .debug_str:000000000000009b .LASF143
+     /tmp/cchYazkt.s:4068   .debug_str:000000000000030d .LASF144
+     /tmp/cchYazkt.s:4030   .debug_str:0000000000000203 .LASF145
+     /tmp/cchYazkt.s:4322   .debug_str:0000000000000bdb .LASF184
+     /tmp/cchYazkt.s:4312   .debug_str:0000000000000b6d .LASF185
+     /tmp/cchYazkt.s:4244   .debug_str:000000000000088c .LASF146
+     /tmp/cchYazkt.s:4184   .debug_str:00000000000006eb .LASF147
+     /tmp/cchYazkt.s:4162   .debug_str:0000000000000611 .LASF148
+     /tmp/cchYazkt.s:4332   .debug_str:0000000000000c22 .LASF149
+     /tmp/cchYazkt.s:4048   .debug_str:0000000000000266 .LASF150
+     /tmp/cchYazkt.s:4220   .debug_str:00000000000007f9 .LASF151
+     /tmp/cchYazkt.s:4276   .debug_str:0000000000000a77 .LASF152
+     /tmp/cchYazkt.s:4014   .debug_str:0000000000000179 .LASF153
+     /tmp/cchYazkt.s:3980   .debug_str:0000000000000094 .LASF154
+     /tmp/cchYazkt.s:3992   .debug_str:00000000000000ee .LASF155
+     /tmp/cchYazkt.s:4288   .debug_str:0000000000000abd .LASF156
+     /tmp/cchYazkt.s:4002   .debug_str:000000000000012f .LASF157
+     /tmp/cchYazkt.s:3964   .debug_str:000000000000000e .LASF158
+     /tmp/cchYazkt.s:4146   .debug_str:00000000000005cd .LASF159
+     /tmp/cchYazkt.s:4200   .debug_str:0000000000000782 .LASF160
+     /tmp/cchYazkt.s:4320   .debug_str:0000000000000bd0 .LASF161
+     /tmp/cchYazkt.s:4092   .debug_str:00000000000003d8 .LASF162
+     /tmp/cchYazkt.s:4044   .debug_str:000000000000025c .LASF163
+     /tmp/cchYazkt.s:4056   .debug_str:00000000000002af .LASF186
+     /tmp/cchYazkt.s:4290   .debug_str:0000000000000acc .LASF164
+GAS LISTING /tmp/cchYazkt.s 			page 29
+
+
+     /tmp/cchYazkt.s:4180   .debug_str:00000000000006d4 .LASF165
+     /tmp/cchYazkt.s:70     .text:000000000000005c .LFB14
+     /tmp/cchYazkt.s:695    .text:0000000000000388 .LFE14
+     /tmp/cchYazkt.s:3454   .debug_loc:0000000000000000 .LLST0
+     /tmp/cchYazkt.s:4224   .debug_str:000000000000081d .LASF166
+     /tmp/cchYazkt.s:3516   .debug_loc:00000000000000f0 .LLST1
+     /tmp/cchYazkt.s:152    .text:00000000000000d0 .LBB35
+     /tmp/cchYazkt.s:598    .text:0000000000000308 .LBE35
+     /tmp/cchYazkt.s:4196   .debug_str:000000000000076d .LASF167
+     /tmp/cchYazkt.s:3631   .debug_loc:000000000000029c .LLST6
+     /tmp/cchYazkt.s:4284   .debug_str:0000000000000a9a .LASF168
+     /tmp/cchYazkt.s:3718   .debug_loc:000000000000040f .LLST7
+     /tmp/cchYazkt.s:253    .text:0000000000000108 .LBB37
+     /tmp/cchYazkt.s:266    .text:000000000000011c .LBE37
+     /tmp/cchYazkt.s:3737   .debug_loc:000000000000046b .LLST8
+     /tmp/cchYazkt.s:258    .text:0000000000000114 .LVL12
+     /tmp/cchYazkt.s:269    .text:000000000000011c .LBB38
+     /tmp/cchYazkt.s:282    .text:0000000000000130 .LBE38
+     /tmp/cchYazkt.s:3744   .debug_loc:000000000000048e .LLST9
+     /tmp/cchYazkt.s:274    .text:0000000000000128 .LVL14
+     /tmp/cchYazkt.s:285    .text:0000000000000130 .LBB39
+     /tmp/cchYazkt.s:325    .text:0000000000000174 .LBE39
+     /tmp/cchYazkt.s:3751   .debug_loc:00000000000004b1 .LLST10
+     /tmp/cchYazkt.s:3758   .debug_loc:00000000000004d4 .LLST11
+     /tmp/cchYazkt.s:293    .text:000000000000013c .LBB40
+     /tmp/cchYazkt.s:301    .text:0000000000000144 .LBE40
+     /tmp/cchYazkt.s:3769   .debug_loc:000000000000050a .LLST12
+     /tmp/cchYazkt.s:3777   .debug_loc:000000000000052e .LLST13
+     /tmp/cchYazkt.s:289    .text:0000000000000138 .LVL16
+     /tmp/cchYazkt.s:308    .text:0000000000000154 .LVL19
+     /tmp/cchYazkt.s:314    .text:0000000000000160 .LVL21
+     /tmp/cchYazkt.s:320    .text:0000000000000170 .LVL22
+     /tmp/cchYazkt.s:328    .text:0000000000000174 .LBB42
+     /tmp/cchYazkt.s:359    .text:00000000000001b0 .LBE42
+     /tmp/cchYazkt.s:3784   .debug_loc:0000000000000551 .LLST14
+     /tmp/cchYazkt.s:3791   .debug_loc:0000000000000574 .LLST15
+     /tmp/cchYazkt.s:332    .text:000000000000017c .LVL24
+     /tmp/cchYazkt.s:338    .text:0000000000000188 .LVL26
+     /tmp/cchYazkt.s:342    .text:0000000000000190 .LVL27
+     /tmp/cchYazkt.s:348    .text:000000000000019c .LVL29
+     /tmp/cchYazkt.s:354    .text:00000000000001ac .LVL30
+     /tmp/cchYazkt.s:362    .text:00000000000001b0 .LBB43
+     /tmp/cchYazkt.s:397    .text:00000000000001e4 .LBE43
+     /tmp/cchYazkt.s:4316   .debug_str:0000000000000bc3 .LASF169
+     /tmp/cchYazkt.s:3802   .debug_loc:00000000000005aa .LLST16
+     /tmp/cchYazkt.s:4018   .debug_str:00000000000001b1 .LASF170
+     /tmp/cchYazkt.s:3809   .debug_loc:00000000000005cd .LLST17
+     /tmp/cchYazkt.s:3817   .debug_loc:00000000000005f2 .LLST18
+     /tmp/cchYazkt.s:3825   .debug_loc:0000000000000617 .LLST19
+     /tmp/cchYazkt.s:371    .text:00000000000001c0 .LVL32
+     /tmp/cchYazkt.s:381    .text:00000000000001d0 .LVL33
+     /tmp/cchYazkt.s:437    .text:0000000000000218 .LBB46
+     /tmp/cchYazkt.s:451    .text:0000000000000230 .LBE46
+     /tmp/cchYazkt.s:3836   .debug_loc:000000000000064d .LLST21
+     /tmp/cchYazkt.s:441    .text:0000000000000220 .LVL42
+     /tmp/cchYazkt.s:443    .text:0000000000000228 .LVL43
+     /tmp/cchYazkt.s:454    .text:0000000000000230 .LBB47
+GAS LISTING /tmp/cchYazkt.s 			page 30
+
+
+     /tmp/cchYazkt.s:482    .text:0000000000000258 .LBE47
+     /tmp/cchYazkt.s:3843   .debug_loc:0000000000000670 .LLST22
+     /tmp/cchYazkt.s:3976   .debug_str:0000000000000084 .LASF171
+     /tmp/cchYazkt.s:3850   .debug_loc:0000000000000693 .LLST23
+     /tmp/cchYazkt.s:3858   .debug_loc:00000000000006b8 .LLST24
+     /tmp/cchYazkt.s:461    .text:000000000000023c .LVL45
+     /tmp/cchYazkt.s:524    .text:0000000000000294 .LBB48
+     /tmp/cchYazkt.s:560    .text:00000000000002d8 .LBE48
+     /tmp/cchYazkt.s:4148   .debug_str:00000000000005d6 .LASF172
+     /tmp/cchYazkt.s:3865   .debug_loc:00000000000006db .LLST25
+     /tmp/cchYazkt.s:3872   .debug_loc:00000000000006fe .LLST26
+     /tmp/cchYazkt.s:3883   .debug_loc:0000000000000734 .LLST27
+     /tmp/cchYazkt.s:529    .text:000000000000029c .LVL53
+     /tmp/cchYazkt.s:536    .text:00000000000002ac .LVL55
+     /tmp/cchYazkt.s:540    .text:00000000000002b4 .LVL56
+     /tmp/cchYazkt.s:546    .text:00000000000002c0 .LVL58
+     /tmp/cchYazkt.s:552    .text:00000000000002d0 .LVL59
+     /tmp/cchYazkt.s:404    .text:00000000000001ec .LBB44
+     /tmp/cchYazkt.s:411    .text:00000000000001f0 .LBE44
+     /tmp/cchYazkt.s:3894   .debug_loc:000000000000076a .LLST20
+     /tmp/cchYazkt.s:403    .text:00000000000001ec .LVL36
+     /tmp/cchYazkt.s:423    .text:0000000000000200 .LVL39
+     /tmp/cchYazkt.s:427    .text:0000000000000210 .LVL40
+     /tmp/cchYazkt.s:489    .text:0000000000000264 .LVL47
+     /tmp/cchYazkt.s:502    .text:0000000000000278 .LVL49
+     /tmp/cchYazkt.s:515    .text:000000000000028c .LVL51
+     /tmp/cchYazkt.s:566    .text:00000000000002e0 .LVL61
+     /tmp/cchYazkt.s:579    .text:00000000000002f4 .LVL63
+     /tmp/cchYazkt.s:600    .text:0000000000000308 .LBB31
+     /tmp/cchYazkt.s:651    .text:0000000000000354 .LBE31
+     /tmp/cchYazkt.s:3901   .debug_loc:000000000000078d .LLST3
+     /tmp/cchYazkt.s:3908   .debug_loc:00000000000007b0 .LLST4
+     /tmp/cchYazkt.s:3915   .debug_loc:00000000000007d3 .LLST5
+     /tmp/cchYazkt.s:624    .text:000000000000031c .LVL69
+     /tmp/cchYazkt.s:628    .text:0000000000000324 .LVL70
+     /tmp/cchYazkt.s:634    .text:0000000000000330 .LVL72
+     /tmp/cchYazkt.s:638    .text:0000000000000338 .LVL73
+     /tmp/cchYazkt.s:644    .text:0000000000000344 .LVL75
+     /tmp/cchYazkt.s:650    .text:0000000000000354 .LVL76
+     /tmp/cchYazkt.s:3950   .debug_ranges:0000000000000000 .Ldebug_ranges0
+     /tmp/cchYazkt.s:3926   .debug_loc:0000000000000809 .LLST2
+     /tmp/cchYazkt.s:660    .text:0000000000000360 .LVL78
+     /tmp/cchYazkt.s:672    .text:0000000000000378 .LVL81
+     /tmp/cchYazkt.s:688    .text:0000000000000384 .LVL83
+     /tmp/cchYazkt.s:92     .text:0000000000000084 .LVL4
+     /tmp/cchYazkt.s:4174   .debug_str:00000000000006a0 .LASF187
+     /tmp/cchYazkt.s:9      .text:0000000000000000 .LFB13
+     /tmp/cchYazkt.s:64     .text:000000000000005c .LFE13
+     /tmp/cchYazkt.s:31     .text:0000000000000020 .LBB24
+     /tmp/cchYazkt.s:36     .text:0000000000000020 .LBE24
+     /tmp/cchYazkt.s:40     .text:000000000000002c .LVL1
+     /tmp/cchYazkt.s:46     .text:0000000000000040 .LVL2
+     /tmp/cchYazkt.s:4046   .debug_str:0000000000000261 .LASF173
+     /tmp/cchYazkt.s:4104   .debug_str:0000000000000441 .LASF174
+     /tmp/cchYazkt.s:4118   .debug_str:00000000000004a2 .LASF175
+     /tmp/cchYazkt.s:4170   .debug_str:0000000000000662 .LASF176
+     /tmp/cchYazkt.s:73     .text:000000000000005c .LVL3
+GAS LISTING /tmp/cchYazkt.s 			page 31
+
+
+     /tmp/cchYazkt.s:127    .text:00000000000000b4 .LVL6
+     /tmp/cchYazkt.s:148    .text:00000000000000d0 .LVL7
+     /tmp/cchYazkt.s:291    .text:000000000000013c .LVL17
+     /tmp/cchYazkt.s:323    .text:0000000000000174 .LVL23
+     /tmp/cchYazkt.s:334    .text:0000000000000180 .LVL25
+     /tmp/cchYazkt.s:357    .text:00000000000001b0 .LVL31
+     /tmp/cchYazkt.s:630    .text:0000000000000328 .LVL71
+     /tmp/cchYazkt.s:653    .text:0000000000000358 .LVL77
+     /tmp/cchYazkt.s:662    .text:0000000000000364 .LVL79
+     /tmp/cchYazkt.s:100    .text:0000000000000088 .LVL5
+     /tmp/cchYazkt.s:168    .text:00000000000000e8 .LVL10
+     /tmp/cchYazkt.s:264    .text:000000000000011c .LVL13
+     /tmp/cchYazkt.s:280    .text:0000000000000130 .LVL15
+     /tmp/cchYazkt.s:395    .text:00000000000001e4 .LVL35
+     /tmp/cchYazkt.s:416    .text:00000000000001f8 .LVL38
+     /tmp/cchYazkt.s:433    .text:0000000000000218 .LVL41
+     /tmp/cchYazkt.s:449    .text:0000000000000230 .LVL44
+     /tmp/cchYazkt.s:480    .text:0000000000000258 .LVL46
+     /tmp/cchYazkt.s:494    .text:000000000000026c .LVL48
+     /tmp/cchYazkt.s:507    .text:0000000000000280 .LVL50
+     /tmp/cchYazkt.s:520    .text:0000000000000294 .LVL52
+     /tmp/cchYazkt.s:558    .text:00000000000002d8 .LVL60
+     /tmp/cchYazkt.s:571    .text:00000000000002e8 .LVL62
+     /tmp/cchYazkt.s:585    .text:00000000000002fc .LVL64
+     /tmp/cchYazkt.s:595    .text:0000000000000308 .LVL66
+     /tmp/cchYazkt.s:161    .text:00000000000000e0 .LVL8
+     /tmp/cchYazkt.s:171    .text:00000000000000f0 .LVL11
+     /tmp/cchYazkt.s:592    .text:0000000000000304 .LVL65
+     /tmp/cchYazkt.s:165    .text:00000000000000e4 .LVL9
+     /tmp/cchYazkt.s:310    .text:0000000000000158 .LVL20
+     /tmp/cchYazkt.s:344    .text:0000000000000194 .LVL28
+     /tmp/cchYazkt.s:542    .text:00000000000002b8 .LVL57
+     /tmp/cchYazkt.s:299    .text:0000000000000144 .LVL18
+     /tmp/cchYazkt.s:387    .text:00000000000001d8 .LVL34
+     /tmp/cchYazkt.s:531    .text:00000000000002a0 .LVL54
+     /tmp/cchYazkt.s:409    .text:00000000000001f0 .LVL37
+     /tmp/cchYazkt.s:608    .text:000000000000030c .LVL67
+     /tmp/cchYazkt.s:640    .text:000000000000033c .LVL74
+     /tmp/cchYazkt.s:666    .text:000000000000036c .LVL80
+     /tmp/cchYazkt.s:679    .text:000000000000037c .LVL82
+     /tmp/cchYazkt.s:716    .debug_info:0000000000000000 .Ldebug_info0
+     /tmp/cchYazkt.s:656    .text:0000000000000358 .LBB29
+     /tmp/cchYazkt.s:673    .text:0000000000000378 .LBE29
+     /tmp/cchYazkt.s:684    .text:000000000000037c .LBB30
+     /tmp/cchYazkt.s:690    .text:0000000000000388 .LBE30
+
+UNDEFINED SYMBOLS
+_ZN15MemoryAllocator7deallocEPv
+_ZN15MemoryAllocator6mallocEm
+_ZN6kernel9Scheduler10getRunningEv
+_ZN6kernel9Scheduler3getEv
+_ZN6kernel9Scheduler10setRunningEPNS_6ThreadE
+yield
+_ZN6kernel9Scheduler3putEPNS_6ThreadE
+_ZN6kernel6Thread12createThreadEPFvPvES1_
+_ZN6kernel6Thread4sendEPS0_Pc
+_ZN6kernel6Thread7recieveEv
+GAS LISTING /tmp/cchYazkt.s 			page 32
+
+
+_ZN6kernel9Semaphore15createSemaphoreEj
+_ZN6kernel9Semaphore16deallocSemaphoreEPS0_
+_ZN6kernel9Semaphore4waitEv
+_ZN6kernel9Semaphore6signalEv
+_ZN6kernel9Scheduler10putToSleepEPNS_6ThreadEm
+_ZN6kernel7Console4getcEv
+_ZN6kernel7Console4putcEc
+_ZN6kernel9Scheduler6onTickEv
+plic_claim
+plic_complete
+_ZN6kernel7Console15handleInterruptEv
